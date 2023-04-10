@@ -8,5 +8,8 @@
         "prettier"
     ],
     "plugins": ["@typescript-eslint", "import"],
-    "parser": "@typescript-eslint/parser"
+    "parser": "@typescript-eslint/parser",
+    "ignorePatterns": [
+        "*.config.js"
+    ]
 }
