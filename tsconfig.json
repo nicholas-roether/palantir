@@ -7,9 +7,12 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"importHelpers": true,
-		"types": ["@types/firefox-webext-browser"]
+		"types": ["@types/firefox-webext-browser"],
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js"
 	},
 	"include": [
-		"./src/**/*.ts"
-	]
+		"./src/**/*.ts",
+		"./src/**/*.tsx"
+	],
 }
