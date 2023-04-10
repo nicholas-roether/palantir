@@ -35,6 +35,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-import-resolver-node", "npm:0.3.7"],\
             ["eslint-plugin-import", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:2.27.5"],\
             ["prettier", "npm:2.8.7"],\
+            ["tslib", "npm:2.5.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"]\
           ],\
           "linkType": "SOFT"\
@@ -1907,6 +1908,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-import-resolver-node", "npm:0.3.7"],\
             ["eslint-plugin-import", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:2.27.5"],\
             ["prettier", "npm:2.8.7"],\
+            ["tslib", "npm:2.5.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"]\
           ],\
           "linkType": "SOFT"\
@@ -2263,6 +2265,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/tslib-npm-1.14.1-102499115e-dbe628ef87.zip/node_modules/tslib/",\
           "packageDependencies": [\
             ["tslib", "npm:1.14.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:2.5.0", {\
+          "packageLocation": "./.yarn/cache/tslib-npm-2.5.0-bb364efebd-ae3ed5f9ce.zip/node_modules/tslib/",\
+          "packageDependencies": [\
+            ["tslib", "npm:2.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
