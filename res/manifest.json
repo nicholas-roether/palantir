@@ -15,5 +15,11 @@
         "default_icon": "icons/icon-32.png",
         "default_title": "Palantir",
         "default_popup": "popup.html"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ]
 }
