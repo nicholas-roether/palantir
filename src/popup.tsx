@@ -1,7 +1,14 @@
-import { createSignal } from "solid-js";
+import { Match, Switch, createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 import { render } from "solid-js/web";
-import { FindVideosMessage, Message, MessageType } from "./common/messages";
+import {
+	CloseSessionMessage,
+	CreateSessionMessage,
+	GetSessionStatusMessage,
+	Message,
+	MessageType,
+	SessionStatus
+} from "./common/messages";
 
 async function getCurrentTab(): Promise<number> {
 	const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -10,39 +17,46 @@ async function getCurrentTab(): Promise<number> {
 	return tabId;
 }
 
+async function createSession() {
+	await browser.runtime.sendMessage(
+		new CreateSessionMessage(await getCurrentTab())
+	);
+}
+
+async function closeSession() {
+	await browser.runtime.sendMessage(
+		new CloseSessionMessage(await getCurrentTab())
+	);
+}
+
+async function refreshSessionStatus() {
+	await browser.runtime.sendMessage(
+		new GetSessionStatusMessage(await getCurrentTab())
+	);
+}
+
 function Popup(): JSX.Element {
-	const [content, setContent] = createSignal("");
+	const [session, setSession] = createSignal<SessionStatus | null>(null);
 
 	browser.runtime.onMessage.addListener((message: Message) => {
-		if (message.type == MessageType.VIDEO_FOUND) {
-			setContent(
-				(content) =>
-					content +
-					`\n${message.locations
-						.map((l) => `${l.windowHref} :: ${l.query}`)
-						.join("; ")}`
-			);
+		if (message.type == MessageType.SESSION_STATUS_UPDATE) {
+			setSession(message.status);
 		}
 	});
 
+	refreshSessionStatus();
+
 	return (
-		<>
-			<button
-				onClick={async () => {
-					try {
-						await browser.tabs.sendMessage(
-							await getCurrentTab(),
-							new FindVideosMessage()
-						);
-					} catch (err) {
-						setContent((content) => content + `\nError: ${err}`);
-					}
-				}}
-			>
-				Find Videos
-			</button>
-			<p>{content()}</p>
-		</>
+		<Switch>
+			<Match when={session() == null}>
+				<h3>No active session</h3>
+				<button onClick={createSession}>Create session</button>
+			</Match>
+			<Match when={session()}>
+				<h3>Session active!</h3>
+				<button onClick={closeSession}>Exit session</button>
+			</Match>
+		</Switch>
 	);
 }
 

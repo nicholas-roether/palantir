@@ -9,7 +9,8 @@ module.exports = {
 	mode: "production",
 	entry: {
 		popup: path.join(src, "popup.tsx"),
-		content: path.join(src, "content.ts")
+		content: path.join(src, "content.ts"),
+		background: path.join(src, "background.ts")
 	},
 	output: {
 		path: path.join(wd, "dist")

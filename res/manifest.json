@@ -22,5 +22,8 @@
             "all_frames": true,
             "js": ["content.js"]
         }
-    ]
+    ],
+    "background": {
+        "scripts": ["background.js"]
+    }
 }
