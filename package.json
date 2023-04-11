@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "solid-js": "^1.7.3",
+    "solid-styled-components": "^0.28.5",
     "webextension-polyfill": "^0.10.0"
   }
 }

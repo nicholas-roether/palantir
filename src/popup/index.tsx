@@ -1,6 +1,7 @@
 import { Match, Switch, createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 import { render } from "solid-js/web";
+import { styled } from "solid-styled-components";
 import {
 	CloseSessionMessage,
 	CreateSessionMessage,
@@ -35,6 +36,11 @@ async function refreshSessionStatus() {
 	);
 }
 
+const PopupContainer = styled("div")`
+	background-color: var(--color-background);
+	padding: 1em;
+`;
+
 function Popup(): JSX.Element {
 	const [session, setSession] = createSignal<SessionStatus | null>(null);
 
@@ -47,16 +53,18 @@ function Popup(): JSX.Element {
 	refreshSessionStatus();
 
 	return (
-		<Switch>
-			<Match when={session() == null}>
-				<h3>No active session</h3>
-				<button onClick={createSession}>Create session</button>
-			</Match>
-			<Match when={session()}>
-				<h3>Session active!</h3>
-				<button onClick={closeSession}>Exit session</button>
-			</Match>
-		</Switch>
+		<PopupContainer>
+			<Switch>
+				<Match when={session() == null}>
+					<h3>No active session</h3>
+					<button onClick={createSession}>Create session</button>
+				</Match>
+				<Match when={session()}>
+					<h3>Session active!</h3>
+					<button onClick={closeSession}>Exit session</button>
+				</Match>
+			</Switch>
+		</PopupContainer>
 	);
 }
 

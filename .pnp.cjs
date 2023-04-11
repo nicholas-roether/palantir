@@ -41,6 +41,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
             ["prettier", "npm:2.8.7"],\
             ["solid-js", "npm:1.7.3"],\
+            ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
             ["ts-loader", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:9.4.2"],\
             ["tslib", "npm:2.5.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"],\
@@ -4179,6 +4180,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["goober", [\
+        ["npm:2.1.12", {\
+          "packageLocation": "./.yarn/cache/goober-npm-2.1.12-834a198dbb-5945cbe924.zip/node_modules/goober/",\
+          "packageDependencies": [\
+            ["goober", "npm:2.1.12"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:f527226224718f386b2976f5ef5d61d0d39c59613037c5a25c6a928854d369162f1e8ba6dbc044e5ad3a89edc91388e613bebe7b043735d1d8e57223bb31c2f4#npm:2.1.12", {\
+          "packageLocation": "./.yarn/__virtual__/goober-virtual-8f2a5bdf89/0/cache/goober-npm-2.1.12-834a198dbb-5945cbe924.zip/node_modules/goober/",\
+          "packageDependencies": [\
+            ["goober", "virtual:f527226224718f386b2976f5ef5d61d0d39c59613037c5a25c6a928854d369162f1e8ba6dbc044e5ad3a89edc91388e613bebe7b043735d1d8e57223bb31c2f4#npm:2.1.12"],\
+            ["@types/csstype", null],\
+            ["csstype", "npm:3.1.2"]\
+          ],\
+          "packagePeers": [\
+            "@types/csstype",\
+            "csstype"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["graceful-fs", [\
         ["npm:4.2.11", {\
           "packageLocation": "./.yarn/cache/graceful-fs-npm-4.2.11-24bb648a68-ac85f94da9.zip/node_modules/graceful-fs/",\
@@ -4768,6 +4791,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
             ["prettier", "npm:2.8.7"],\
             ["solid-js", "npm:1.7.3"],\
+            ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
             ["ts-loader", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:9.4.2"],\
             ["tslib", "npm:2.5.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"],\
@@ -5176,6 +5200,30 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["solid-js", "npm:1.7.3"],\
             ["csstype", "npm:3.1.2"],\
             ["seroval", "npm:0.5.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["solid-styled-components", [\
+        ["npm:0.28.5", {\
+          "packageLocation": "./.yarn/cache/solid-styled-components-npm-0.28.5-25d05a299b-e580955822.zip/node_modules/solid-styled-components/",\
+          "packageDependencies": [\
+            ["solid-styled-components", "npm:0.28.5"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5", {\
+          "packageLocation": "./.yarn/__virtual__/solid-styled-components-virtual-f527226224/0/cache/solid-styled-components-npm-0.28.5-25d05a299b-e580955822.zip/node_modules/solid-styled-components/",\
+          "packageDependencies": [\
+            ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
+            ["@types/solid-js", null],\
+            ["csstype", "npm:3.1.2"],\
+            ["goober", "virtual:f527226224718f386b2976f5ef5d61d0d39c59613037c5a25c6a928854d369162f1e8ba6dbc044e5ad3a89edc91388e613bebe7b043735d1d8e57223bb31c2f4#npm:2.1.12"],\
+            ["solid-js", "npm:1.7.3"]\
+          ],\
+          "packagePeers": [\
+            "@types/solid-js",\
+            "solid-js"\
           ],\
           "linkType": "HARD"\
         }]\
