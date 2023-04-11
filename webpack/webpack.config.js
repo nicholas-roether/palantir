@@ -15,7 +15,7 @@ module.exports = {
 		path: path.join(wd, "dist")
 	},
 	resolve: {
-		extensions: [".ts", ".js"]
+		extensions: [".ts", ".js", ".tsx", ".jsx"]
 	},
 	module: {
 		rules: [
@@ -23,13 +23,14 @@ module.exports = {
 				test: /\.tsx?$/,
 				loader: "babel-loader",
 				options: {
-					presets: ["solid"]
-				}
+					babelrc: false,
+					presets: [
+						"@babel/preset-env",
+						"solid",
+						"@babel/preset-typescript"
+					]
+				},
 			},
-			{
-				test: /\.tsx?$/,
-				loader: "ts-loader",
-			}
 		]
 	},
 	plugins: [
