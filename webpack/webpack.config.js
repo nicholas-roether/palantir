@@ -37,7 +37,8 @@ module.exports = {
 	plugins: [
 		new CopyPlugin({
 			patterns: [
-				{ from: "./res", to: "." }
+				{ from: "./res", to: "." },
+				{ from: require.resolve("webextension-polyfill"), to: "."}
 			]
 		})
 	]
