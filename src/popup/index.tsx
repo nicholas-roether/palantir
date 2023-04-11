@@ -8,7 +8,7 @@ import {
 	Message,
 	MessageType,
 	SessionStatus
-} from "./common/messages";
+} from "../common/messages";
 
 async function getCurrentTab(): Promise<number> {
 	const tabs = await browser.tabs.query({ active: true, currentWindow: true });

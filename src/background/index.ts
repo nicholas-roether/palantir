@@ -3,7 +3,7 @@ import {
 	Message,
 	MessageType,
 	SessionStatusUpdateMessage
-} from "./common/messages";
+} from "../common/messages";
 
 class Session {}
 

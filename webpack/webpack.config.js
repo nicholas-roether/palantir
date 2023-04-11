@@ -8,9 +8,9 @@ const src = path.join(wd, "src");
 module.exports = {
 	mode: "production",
 	entry: {
-		popup: path.join(src, "popup.tsx"),
-		content: path.join(src, "content.ts"),
-		background: path.join(src, "background.ts")
+		popup: path.join(src, "popup"),
+		content: path.join(src, "content"),
+		background: path.join(src, "background")
 	},
 	output: {
 		path: path.join(wd, "dist")
