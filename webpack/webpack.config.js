@@ -10,7 +10,8 @@ module.exports = {
 	entry: {
 		popup: path.join(src, "popup"),
 		content: path.join(src, "content"),
-		background: path.join(src, "background")
+		background: path.join(src, "background"),
+		options: path.join(src, "options")
 	},
 	output: {
 		path: path.join(wd, "dist")

@@ -9,7 +9,8 @@
         "48": "icons/icon-48.png"
     },
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "storage"
     ],
     "browser_action": {
         "default_icon": "icons/icon-32.png",
@@ -31,5 +32,13 @@
             "browser-polyfill.js",
             "background.js"
         ]
+    },
+    "options_ui": {
+        "page": "options.html"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "palantir@niko-roether.dev"
+        }
     }
 }
