@@ -15,7 +15,13 @@ function Popup(): JSX.Element {
 
 	browser.runtime.onMessage.addListener((message: Message) => {
 		if (message.type == MessageType.VIDEO_FOUND) {
-			setContent((content) => content + `\n${message.queries.join(", ")}`);
+			setContent(
+				(content) =>
+					content +
+					`\n${message.locations
+						.map((l) => `${l.windowHref} :: ${l.query}`)
+						.join("; ")}`
+			);
 		}
 	});
 

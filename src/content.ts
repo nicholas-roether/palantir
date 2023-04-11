@@ -1,15 +1,18 @@
-import { Message, MessageType, VideosFoundMessage } from "./common/messages";
-import { getQueryFor } from "./common/queries";
+import { ElementLocation, Message, MessageType, VideosFoundMessage } from "./common/messages";
+import { getQueryFor } from "./common/query";
 
 
-function findVideos(): string[] {
-    window.name
-    return Array.from(window.document.querySelectorAll("video")).map((video) => getQueryFor(video));
+function findVideos(): ElementLocation[] {
+    const locations: ElementLocation[] = [];
+    for (const elem of window.document.querySelectorAll("video")) {
+        locations.push({ windowHref: window.location.href, query: getQueryFor(elem) });
+    }
+    return locations;
 }
 
 function onFindVideos() {
-    const videos = findVideos();
-    browser.runtime.sendMessage(new VideosFoundMessage(videos));
+    const videoLocations = findVideos();
+    browser.runtime.sendMessage(new VideosFoundMessage(videoLocations));
 }
 
 browser.runtime.onMessage.addListener((message: Message) => {

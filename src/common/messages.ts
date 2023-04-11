@@ -7,15 +7,20 @@ class FindVideosMessage {
     public readonly type = MessageType.FIND_VIDEOS;
 }
 
+interface ElementLocation {
+    readonly windowHref: string;
+    readonly query: string;
+}
+
 class VideosFoundMessage {
     public readonly type = MessageType.VIDEO_FOUND;
-    public readonly queries: string[];
+    public readonly locations: ElementLocation[];
 
-    constructor(queries: string[]) {
-        this.queries = queries;
+    constructor(locations: ElementLocation[]) {
+        this.locations = locations;
     }
 }
 
 type Message = FindVideosMessage | VideosFoundMessage;
 
-export { MessageType, Message, FindVideosMessage, VideosFoundMessage }
+export { MessageType, Message, FindVideosMessage, ElementLocation, VideosFoundMessage }
