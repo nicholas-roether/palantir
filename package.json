@@ -25,6 +25,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "peerjs": "^1.4.7",
     "solid-js": "^1.7.3",
     "solid-styled-components": "^0.28.5",
     "webextension-polyfill": "^0.10.0"

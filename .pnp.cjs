@@ -40,6 +40,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["copy-webpack-plugin", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:11.0.0"],\
             ["eslint", "npm:8.38.0"],\
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
+            ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
             ["solid-js", "npm:1.7.3"],\
             ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
@@ -2506,6 +2507,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@swc/helpers", [\
+        ["npm:0.3.17", {\
+          "packageLocation": "./.yarn/cache/@swc-helpers-npm-0.3.17-994c9ae28e-ce3a5146d7.zip/node_modules/@swc/helpers/",\
+          "packageDependencies": [\
+            ["@swc/helpers", "npm:0.3.17"],\
+            ["tslib", "npm:2.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/eslint", [\
         ["npm:8.37.0", {\
           "packageLocation": "./.yarn/cache/@types-eslint-npm-8.37.0-1f765f44f3-06d3b3fba1.zip/node_modules/@types/eslint/",\
@@ -3936,6 +3947,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["eventemitter3", [\
+        ["npm:4.0.7", {\
+          "packageLocation": "./.yarn/cache/eventemitter3-npm-4.0.7-7afcdd74ae-1875311c42.zip/node_modules/eventemitter3/",\
+          "packageDependencies": [\
+            ["eventemitter3", "npm:4.0.7"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["events", [\
         ["npm:3.3.0", {\
           "packageLocation": "./.yarn/cache/events-npm-3.3.0-c280bc7e48-f6f487ad21.zip/node_modules/events/",\
@@ -4800,6 +4820,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["copy-webpack-plugin", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:11.0.0"],\
             ["eslint", "npm:8.38.0"],\
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
+            ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
             ["solid-js", "npm:1.7.3"],\
             ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
@@ -4864,6 +4885,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/path-type-npm-4.0.0-10d47fc86a-5b1e2daa24.zip/node_modules/path-type/",\
           "packageDependencies": [\
             ["path-type", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["peerjs", [\
+        ["npm:1.4.7", {\
+          "packageLocation": "./.yarn/cache/peerjs-npm-1.4.7-1e4b4eae57-9a1af9134a.zip/node_modules/peerjs/",\
+          "packageDependencies": [\
+            ["peerjs", "npm:1.4.7"],\
+            ["@swc/helpers", "npm:0.3.17"],\
+            ["eventemitter3", "npm:4.0.7"],\
+            ["peerjs-js-binarypack", "npm:1.0.1"],\
+            ["webrtc-adapter", "npm:7.7.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["peerjs-js-binarypack", [\
+        ["npm:1.0.1", {\
+          "packageLocation": "./.yarn/cache/peerjs-js-binarypack-npm-1.0.1-23f8e8d5c1-1b543e3399.zip/node_modules/peerjs-js-binarypack/",\
+          "packageDependencies": [\
+            ["peerjs-js-binarypack", "npm:1.0.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5081,6 +5124,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["rtcpeerconnection-shim", [\
+        ["npm:1.2.15", {\
+          "packageLocation": "./.yarn/cache/rtcpeerconnection-shim-npm-1.2.15-35e45fe028-42a733d8e3.zip/node_modules/rtcpeerconnection-shim/",\
+          "packageDependencies": [\
+            ["rtcpeerconnection-shim", "npm:1.2.15"],\
+            ["sdp", "npm:2.12.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["run-parallel", [\
         ["npm:1.2.0", {\
           "packageLocation": "./.yarn/cache/run-parallel-npm-1.2.0-3f47ff2034-cb4f97ad25.zip/node_modules/run-parallel/",\
@@ -5119,6 +5172,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ajv", "npm:8.12.0"],\
             ["ajv-formats", "virtual:4b7d8bb1684f7f69bf042a03dae4d118ab00edf0e34f409e5270fb3cce9e5fcf8ce9581b8f5bc8597c1e50c52a23eba5d4eadeede8c58ab0be3187e2389e11d5#npm:2.1.1"],\
             ["ajv-keywords", "virtual:4b7d8bb1684f7f69bf042a03dae4d118ab00edf0e34f409e5270fb3cce9e5fcf8ce9581b8f5bc8597c1e50c52a23eba5d4eadeede8c58ab0be3187e2389e11d5#npm:5.1.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["sdp", [\
+        ["npm:2.12.0", {\
+          "packageLocation": "./.yarn/cache/sdp-npm-2.12.0-51e8c6a24c-5deb20ac50.zip/node_modules/sdp/",\
+          "packageDependencies": [\
+            ["sdp", "npm:2.12.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5723,6 +5785,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/webpack-sources-npm-3.2.3-6bfb5d9563-989e401b9f.zip/node_modules/webpack-sources/",\
           "packageDependencies": [\
             ["webpack-sources", "npm:3.2.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["webrtc-adapter", [\
+        ["npm:7.7.1", {\
+          "packageLocation": "./.yarn/cache/webrtc-adapter-npm-7.7.1-54a95f8fb1-16534a7217.zip/node_modules/webrtc-adapter/",\
+          "packageDependencies": [\
+            ["webrtc-adapter", "npm:7.7.1"],\
+            ["rtcpeerconnection-shim", "npm:1.2.15"],\
+            ["sdp", "npm:2.12.0"]\
           ],\
           "linkType": "HARD"\
         }]\
