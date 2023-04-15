@@ -37,26 +37,32 @@ abstract class Session extends EventTarget {
 		this.dispatchEvent(new SessionCloseEvent(reason));
 	}
 
-	public abstract getStatus(): SessionStatus;
+	public abstract getStatus(): Promise<SessionStatus>;
 
 	protected abstract handleConnection(connection: Connection): Promise<void>;
 
-	protected broadcastStatusUpdate(): void {
-		this.dispatchEvent(new SessionStatusUpdateEvent(this.getStatus()));
+	protected async broadcastStatusUpdate(): Promise<void> {
+		this.dispatchEvent(new SessionStatusUpdateEvent(await this.getStatus()));
 	}
 }
 
 class ClientSession extends Session {
+	public readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
 
 	constructor(hostId: string, accessToken: string) {
 		super();
+		this.hostId = hostId;
 		this.auth = new ClientSessionAuth(accessToken);
 		this.peer.connectTo(hostId);
 	}
 
-	public getStatus(): SessionStatus {
-		return { type: SessionType.CLIENT };
+	public async getStatus(): Promise<SessionStatus> {
+		return {
+			type: SessionType.CLIENT,
+			hostId: this.hostId,
+			accessToken: this.auth.accessToken
+		};
 	}
 
 	protected async handleConnection(connection: Connection): Promise<void> {
@@ -78,16 +84,20 @@ class HostSession extends Session {
 		this.auth = new HostSessionAuth();
 	}
 
-	public get id(): string {
-		return this.peer.id;
+	public async getId(): Promise<string> {
+		return await this.peer.getId();
 	}
 
 	public get accessToken(): string {
 		return this.auth.accessToken;
 	}
 
-	public getStatus(): SessionStatus {
-		return { type: SessionType.HOST };
+	public async getStatus(): Promise<SessionStatus> {
+		return {
+			type: SessionType.HOST,
+			hostId: await this.getId(),
+			accessToken: this.auth.accessToken
+		};
 	}
 
 	protected async handleConnection(connection: Connection): Promise<void> {

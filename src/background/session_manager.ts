@@ -83,7 +83,7 @@ class SessionManager extends EventTarget {
 			this.broadcastSessionStatus(tabId, evt.status);
 		});
 
-		this.broadcastSessionStatus(tabId, session.getStatus());
+		this.broadcastSessionStatus(tabId, await session.getStatus());
 	}
 
 	private broadcastSessionStatus(tabId: number, status: SessionStatus): void {

@@ -76,6 +76,8 @@ const enum SessionType {
 
 interface SessionStatus {
 	type: SessionType;
+	hostId: string;
+	accessToken: string;
 }
 
 class SessionStatusUpdateMessage {

@@ -24,8 +24,8 @@ sessionManager.addEventListener("close", (evt) => {
 	sendSessionClosed(evt.tabId, evt.reason);
 });
 
-function getSessionStatus(tabId: number): SessionStatus | null {
-	return sessionManager.getSession(tabId)?.getStatus() ?? null;
+async function getSessionStatus(tabId: number): Promise<SessionStatus | null> {
+	return (await sessionManager.getSession(tabId)?.getStatus()) ?? null;
 }
 
 async function sendSessionStatusUpdate(
@@ -44,7 +44,7 @@ async function sendSessionClosed(
 	await browser.runtime.sendMessage(new SessionClosedMessage(tabId, reason));
 }
 
-browser.runtime.onMessage.addListener((message: Message) => {
+browser.runtime.onMessage.addListener(async (message: Message) => {
 	switch (message.type) {
 		case MessageType.CREATE_HOST_SESSION:
 			sessionManager.openHostSession(message.tabId);
@@ -60,7 +60,10 @@ browser.runtime.onMessage.addListener((message: Message) => {
 			sessionManager.closeSession(message.tabId, message.reason);
 			break;
 		case MessageType.GET_SESSION_STATUS:
-			sendSessionStatusUpdate(message.tabId, getSessionStatus(message.tabId));
+			sendSessionStatusUpdate(
+				message.tabId,
+				await getSessionStatus(message.tabId)
+			);
 	}
 });
 

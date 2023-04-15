@@ -10,10 +10,13 @@ type Packet = ValidatedBy<typeof packetSchema> & Record<string, unknown>;
 
 type ConnectionHandler = (connection: Connection) => Promise<void> | void;
 
+const OPEN_TIMEOUT = 5000; // ms
+
 class Peer {
 	private readonly peer: peerjs.Peer;
 	private readonly handler: ConnectionHandler;
 	private readonly connections: Set<Connection>;
+	private readonly openPromise: Promise<void>;
 
 	constructor(handler: ConnectionHandler) {
 		this.peer = new peerjs.Peer();
@@ -21,9 +24,12 @@ class Peer {
 		this.connections = new Set();
 
 		this.peer.on("connection", (conn) => this.handleConnection(conn));
+
+		this.openPromise = this.awaitOpen().catch(() => this.close());
 	}
 
-	public get id(): string {
+	public async getId(): Promise<string> {
+		await this.openPromise;
 		return this.peer.id;
 	}
 
@@ -45,6 +51,13 @@ class Peer {
 		this.connections.add(conn);
 		conn.addEventListener("close", () => this.connections.delete(conn));
 		this.handler(conn);
+	}
+
+	private awaitOpen(): Promise<void> {
+		return new Promise((res, rej) => {
+			setTimeout(() => rej(new Error("Peer opening timed out")), OPEN_TIMEOUT);
+			this.peer.on("open", () => res(undefined));
+		});
 	}
 }
 
