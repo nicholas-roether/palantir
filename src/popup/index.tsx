@@ -1,4 +1,5 @@
 import { Match, Switch, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { JSX } from "solid-js/jsx-runtime";
 import { render } from "solid-js/web";
 import { styled } from "solid-styled-components";
@@ -52,6 +53,44 @@ const PopupContainer = styled("div")`
 	padding: 1em;
 `;
 
+function HostSessionForm(): JSX.Element {
+	return <button onClick={createHostSession}>Create Host session</button>;
+}
+
+interface ClientSessionFormFields {
+	hostId: string;
+	accessToken: string;
+}
+
+function ClientSessionForm(): JSX.Element {
+	const [form, setForm] = createStore<ClientSessionFormFields>({
+		hostId: "",
+		accessToken: ""
+	});
+
+	return (
+		<form>
+			<input
+				value={form.hostId}
+				placeholder="Host ID"
+				type="text"
+				onChange={(e) => setForm("hostId", e.target.value)}
+			/>
+			<input
+				value={form.accessToken}
+				placeholder="AccessToken"
+				type="text"
+				onChange={(e) => setForm("accessToken", e.target.value)}
+			/>
+			<button
+				onClick={() => createClientSession(form.hostId, form.accessToken)}
+			>
+				Create client session
+			</button>
+		</form>
+	);
+}
+
 function Popup(): JSX.Element {
 	const [session, setSession] = createSignal<SessionStatus | null>(null);
 
@@ -72,7 +111,9 @@ function Popup(): JSX.Element {
 			<Switch>
 				<Match when={session() == null}>
 					<h3>No active session</h3>
-					<button onClick={createHostSession}>Create Host session</button>
+					<HostSessionForm />
+					<br />
+					<ClientSessionForm />
 				</Match>
 				<Match when={session()}>
 					<h3>Session active!</h3>
