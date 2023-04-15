@@ -1,49 +1,69 @@
+import ty, { assertType } from "lifeboat";
 import {
 	SessionStatus,
 	Message,
 	MessageType,
-	SessionStatusUpdateMessage
+	SessionStatusUpdateMessage,
+	SessionCloseReason,
+	SessionClosedMessage
 } from "../common/messages";
+import SessionManager, {
+	ManagedSessionCloseEvent,
+	ManagedSessionStatusUpdateEvent
+} from "./session_manager";
 
-class Session {}
+const sessionManager = new SessionManager();
 
-const sessions: Map<number, Session> = new Map();
+sessionManager.addEventListener("statusupdate", (evt) => {
+	assertType(ty.instanceof(ManagedSessionStatusUpdateEvent), evt);
+	sendSessionStatusUpdate(evt.tabId, evt.status);
+});
+
+sessionManager.addEventListener("close", (evt) => {
+	assertType(ty.instanceof(ManagedSessionCloseEvent), evt);
+	sendSessionClosed(evt.tabId, evt.reason);
+});
 
 function getSessionStatus(tabId: number): SessionStatus | null {
-	const session = sessions.get(tabId);
-	if (!session) return null;
-	return {};
+	return sessionManager.getSession(tabId)?.getStatus() ?? null;
 }
 
-async function sendSessionStatusUpdate(tabId: number) {
+async function sendSessionStatusUpdate(
+	tabId: number,
+	status: SessionStatus | null
+): Promise<void> {
 	await browser.runtime.sendMessage(
-		new SessionStatusUpdateMessage(getSessionStatus(tabId))
+		new SessionStatusUpdateMessage(tabId, status)
 	);
 }
 
-function createSession(tabId: number) {
-	sessions.set(tabId, new Session());
-	sendSessionStatusUpdate(tabId);
-}
-
-function closeSession(tabId: number) {
-	sessions.delete(tabId);
-	sendSessionStatusUpdate(tabId);
+async function sendSessionClosed(
+	tabId: number,
+	reason: SessionCloseReason
+): Promise<void> {
+	await browser.runtime.sendMessage(new SessionClosedMessage(tabId, reason));
 }
 
 browser.runtime.onMessage.addListener((message: Message) => {
 	switch (message.type) {
-		case MessageType.CREATE_SESSION:
-			createSession(message.tabId);
+		case MessageType.CREATE_HOST_SESSION:
+			sessionManager.openHostSession(message.tabId);
+			break;
+		case MessageType.CREATE_CLIENT_SESSION:
+			sessionManager.openClientSession(
+				message.tabId,
+				message.hostId,
+				message.accessToken
+			);
 			break;
 		case MessageType.CLOSE_SESSION:
-			closeSession(message.tabId);
+			sessionManager.closeSession(message.tabId, message.reason);
 			break;
 		case MessageType.GET_SESSION_STATUS:
-			sendSessionStatusUpdate(message.tabId);
+			sendSessionStatusUpdate(message.tabId, getSessionStatus(message.tabId));
 	}
 });
 
 browser.tabs.onRemoved.addListener((tabId) => {
-	sessions.delete(tabId);
+	sessionManager.closeSession(tabId, SessionCloseReason.TAB_CLOSED);
 });

@@ -1,14 +1,24 @@
 import * as peerjs from "peerjs";
+import ty, { ValidatedBy, checkType } from "lifeboat";
+import { promiseWithTimeout } from "../common/utils";
+
+const packetSchema = ty.object({
+	type: ty.number()
+});
+
+type Packet = ValidatedBy<typeof packetSchema> & Record<string, unknown>;
 
 type ConnectionHandler = (connection: Connection) => Promise<void> | void;
 
 class Peer {
 	private readonly peer: peerjs.Peer;
 	private readonly handler: ConnectionHandler;
+	private readonly connections: Set<Connection>;
 
 	constructor(handler: ConnectionHandler) {
 		this.peer = new peerjs.Peer();
 		this.handler = handler;
+		this.connections = new Set();
 
 		this.peer.on("connection", (conn) => this.handleConnection(conn));
 	}
@@ -22,39 +32,70 @@ class Peer {
 		this.handleConnection(conn);
 	}
 
-	private handleConnection(connection: peerjs.DataConnection) {
-		this.handler(new Connection(connection));
+	public async close(): Promise<void> {
+		const closePromises: Promise<void>[] = [];
+		for (const conn of this.connections) {
+			closePromises.push(conn.close());
+		}
+		await Promise.all(closePromises);
+	}
+
+	private handleConnection(connection: peerjs.DataConnection): void {
+		const conn = new Connection(connection);
+		this.connections.add(conn);
+		conn.addEventListener("close", () => this.connections.delete(conn));
+		this.handler(conn);
 	}
 }
 
-class Connection {
+class ConnectionCloseEvent extends Event {
+	constructor() {
+		super("close");
+	}
+}
+
+class Connection extends EventTarget {
 	private readonly connection: peerjs.DataConnection;
-	private dataStreamController: ReadableStreamDefaultController<unknown> | null =
+	private dataStreamController: ReadableStreamDefaultController<Packet> | null =
 		null;
-	public readonly incoming: ReadableStream<unknown>;
-	public readonly outgoing: WritableStream<unknown>;
+	private readonly incomingStream: ReadableStream<Packet>;
+	private readonly outgoingStream: WritableStream<Packet>;
+
+	public readonly reader: ReadableStreamDefaultReader<Packet>;
+	public readonly writer: WritableStreamDefaultWriter<Packet>;
 
 	constructor(connection: peerjs.DataConnection) {
+		super();
 		this.connection = connection;
 		this.connection.on("data", (data) => this.onData(data));
 		this.connection.on("close", () => this.onClose());
 		this.connection.on("error", (err) => this.onError(err));
 
-		this.incoming = new ReadableStream({
+		this.incomingStream = new ReadableStream({
 			start: (controller) => {
 				this.dataStreamController = controller;
 			}
 		});
 
-		this.outgoing = new WritableStream({
+		this.outgoingStream = new WritableStream({
 			write: (chunk) => {
 				this.sendData(chunk);
 			}
 		});
+
+		this.reader = this.incomingStream.getReader();
+		this.writer = this.outgoingStream.getWriter();
 	}
 
-	public close() {
+	public async expectIncoming(timeout: number): Promise<Packet | null> {
+		const res = await promiseWithTimeout(this.reader.read(), null, timeout);
+		return res?.value ?? null;
+	}
+
+	public async close(): Promise<void> {
 		this.connection.close();
+		await this.incomingStream.cancel();
+		await this.outgoingStream.close();
 	}
 
 	private sendData(data: unknown): void {
@@ -62,11 +103,19 @@ class Connection {
 	}
 
 	private onData(data: unknown): void {
-		this.dataStreamController?.enqueue(data);
+		if (checkType(packetSchema, data)) {
+			this.dataStreamController?.enqueue(data);
+		} else {
+			console.error(
+				`Received malformed data from remote peer: ${packetSchema.reason}. Terminating connection.`
+			);
+			this.close();
+		}
 	}
 
 	private onClose(): void {
 		this.dataStreamController?.close();
+		this.dispatchEvent(new ConnectionCloseEvent());
 	}
 
 	private onError(err: Error): void {

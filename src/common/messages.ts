@@ -1,10 +1,12 @@
 const enum MessageType {
 	FIND_VIDEOS,
 	VIDEO_FOUND,
-	CREATE_SESSION,
+	CREATE_HOST_SESSION,
+	CREATE_CLIENT_SESSION,
 	CLOSE_SESSION,
 	GET_SESSION_STATUS,
-	SESSION_STATUS_UPDATE
+	SESSION_STATUS_UPDATE,
+	SESSION_CLOSED
 }
 
 class FindVideosMessage {
@@ -25,8 +27,8 @@ class VideosFoundMessage {
 	}
 }
 
-class CreateSessionMessage {
-	public readonly type = MessageType.CREATE_SESSION;
+class CreateHostSessionMessage {
+	public readonly type = MessageType.CREATE_HOST_SESSION;
 	public readonly tabId: number;
 
 	constructor(tabId: number) {
@@ -34,12 +36,27 @@ class CreateSessionMessage {
 	}
 }
 
+class CreateClientSessionMessage {
+	public readonly type = MessageType.CREATE_CLIENT_SESSION;
+	public readonly tabId: number;
+	public readonly hostId: string;
+	public readonly accessToken: string;
+
+	constructor(tabId: number, hostId: string, accessToken: string) {
+		this.tabId = tabId;
+		this.hostId = hostId;
+		this.accessToken = accessToken;
+	}
+}
+
 class CloseSessionMessage {
 	public readonly type = MessageType.CLOSE_SESSION;
 	public readonly tabId: number;
+	public readonly reason: SessionCloseReason;
 
-	constructor(tabId: number) {
+	constructor(tabId: number, reason: SessionCloseReason) {
 		this.tabId = tabId;
+		this.reason = reason;
 	}
 }
 
@@ -52,25 +69,54 @@ class GetSessionStatusMessage {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface SessionStatus {}
+const enum SessionType {
+	HOST,
+	CLIENT
+}
+
+interface SessionStatus {
+	type: SessionType;
+}
 
 class SessionStatusUpdateMessage {
 	public readonly type = MessageType.SESSION_STATUS_UPDATE;
+	public readonly tabId: number;
 	public readonly status: SessionStatus | null;
 
-	constructor(status: SessionStatus | null) {
+	constructor(tabId: number, status: SessionStatus | null) {
+		this.tabId = tabId;
 		this.status = status;
+	}
+}
+
+const enum SessionCloseReason {
+	UNKNOWN,
+	UNAUTHORIZED,
+	DISCONNECTED,
+	SUPERSEDED,
+	TAB_CLOSED
+}
+
+class SessionClosedMessage {
+	public readonly type = MessageType.SESSION_CLOSED;
+	public readonly tabId: number;
+	public readonly reason: SessionCloseReason;
+
+	constructor(tabId: number, reason: SessionCloseReason) {
+		this.tabId = tabId;
+		this.reason = reason;
 	}
 }
 
 type Message =
 	| FindVideosMessage
 	| VideosFoundMessage
-	| CreateSessionMessage
+	| CreateHostSessionMessage
+	| CreateClientSessionMessage
 	| CloseSessionMessage
 	| GetSessionStatusMessage
-	| SessionStatusUpdateMessage;
+	| SessionStatusUpdateMessage
+	| SessionClosedMessage;
 
 export {
 	MessageType,
@@ -78,9 +124,13 @@ export {
 	FindVideosMessage,
 	ElementLocation,
 	VideosFoundMessage,
-	CreateSessionMessage,
+	CreateHostSessionMessage,
+	CreateClientSessionMessage,
 	CloseSessionMessage,
 	GetSessionStatusMessage,
+	SessionType,
 	SessionStatus,
-	SessionStatusUpdateMessage
+	SessionStatusUpdateMessage,
+	SessionCloseReason,
+	SessionClosedMessage
 };
