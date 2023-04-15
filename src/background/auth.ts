@@ -3,7 +3,7 @@ import { encode } from "base64-arraybuffer";
 import { Connection } from "./p2p";
 import PacketType from "./packets";
 
-const TOKEN_SIZE = 256;
+const TOKEN_SIZE = 24;
 const RESPONSE_TIMEOUT = 5000; // ms
 
 const authTokenPacketSchema = ty.object({
