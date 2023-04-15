@@ -2,7 +2,8 @@
   "name": "palantir",
   "packageManager": "yarn@3.5.0",
   "scripts": {
-    "build": "webpack --config webpack/webpack.config.js"
+    "build": "webpack --config webpack/webpack.config.js",
+    "lint": "eslint ./src"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",

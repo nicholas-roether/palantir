@@ -4,11 +4,13 @@ import { render } from "solid-js/web";
 import { styled } from "solid-styled-components";
 import {
 	CloseSessionMessage,
-	CreateSessionMessage,
+	CreateHostSessionMessage,
+	CreateClientSessionMessage,
 	GetSessionStatusMessage,
 	Message,
 	MessageType,
-	SessionStatus
+	SessionStatus,
+	SessionCloseReason
 } from "../common/messages";
 
 async function getCurrentTab(): Promise<number> {
@@ -18,19 +20,28 @@ async function getCurrentTab(): Promise<number> {
 	return tabId;
 }
 
-async function createSession() {
+async function createHostSession(): Promise<void> {
 	await browser.runtime.sendMessage(
-		new CreateSessionMessage(await getCurrentTab())
+		new CreateHostSessionMessage(await getCurrentTab())
 	);
 }
 
-async function closeSession() {
+async function createClientSession(
+	hostId: string,
+	accessToken: string
+): Promise<void> {
 	await browser.runtime.sendMessage(
-		new CloseSessionMessage(await getCurrentTab())
+		new CreateClientSessionMessage(await getCurrentTab(), hostId, accessToken)
 	);
 }
 
-async function refreshSessionStatus() {
+async function closeSession(reason: SessionCloseReason): Promise<void> {
+	await browser.runtime.sendMessage(
+		new CloseSessionMessage(await getCurrentTab(), reason)
+	);
+}
+
+async function refreshSessionStatus(): Promise<void> {
 	await browser.runtime.sendMessage(
 		new GetSessionStatusMessage(await getCurrentTab())
 	);
@@ -45,8 +56,12 @@ function Popup(): JSX.Element {
 	const [session, setSession] = createSignal<SessionStatus | null>(null);
 
 	browser.runtime.onMessage.addListener((message: Message) => {
-		if (message.type == MessageType.SESSION_STATUS_UPDATE) {
-			setSession(message.status);
+		switch (message.type) {
+			case MessageType.SESSION_STATUS_UPDATE:
+				setSession(message.status);
+				break;
+			case MessageType.SESSION_CLOSED:
+				setSession(null);
 		}
 	});
 
@@ -57,11 +72,16 @@ function Popup(): JSX.Element {
 			<Switch>
 				<Match when={session() == null}>
 					<h3>No active session</h3>
-					<button onClick={createSession}>Create session</button>
+					<button onClick={createHostSession}>Create Host session</button>
 				</Match>
 				<Match when={session()}>
 					<h3>Session active!</h3>
-					<button onClick={closeSession}>Exit session</button>
+					<code>{JSON.stringify(session(), undefined, 3)}</code>
+					<button
+						onClick={() => closeSession(SessionCloseReason.CLOSED_BY_USER)}
+					>
+						Exit session
+					</button>
 				</Match>
 			</Switch>
 		</PopupContainer>

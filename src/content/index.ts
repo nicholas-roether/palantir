@@ -17,7 +17,7 @@ function findVideos(): ElementLocation[] {
 	return locations;
 }
 
-function onFindVideos() {
+function onFindVideos(): void {
 	const videoLocations = findVideos();
 	browser.runtime.sendMessage(new VideosFoundMessage(videoLocations));
 }

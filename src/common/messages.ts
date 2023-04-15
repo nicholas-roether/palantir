@@ -94,7 +94,8 @@ const enum SessionCloseReason {
 	UNAUTHORIZED,
 	DISCONNECTED,
 	SUPERSEDED,
-	TAB_CLOSED
+	TAB_CLOSED,
+	CLOSED_BY_USER
 }
 
 class SessionClosedMessage {

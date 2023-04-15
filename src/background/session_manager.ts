@@ -80,10 +80,14 @@ class SessionManager extends EventTarget {
 
 		session.addEventListener("statusupdate", (evt) => {
 			assertType(ty.instanceof(SessionStatusUpdateEvent), evt);
-			this.dispatchEvent(
-				new ManagedSessionStatusUpdateEvent(tabId, evt.status)
-			);
+			this.broadcastSessionStatus(tabId, evt.status);
 		});
+
+		this.broadcastSessionStatus(tabId, session.getStatus());
+	}
+
+	private broadcastSessionStatus(tabId: number, status: SessionStatus): void {
+		this.dispatchEvent(new ManagedSessionStatusUpdateEvent(tabId, status));
 	}
 }
 
