@@ -47,10 +47,13 @@ class Peer {
 	}
 
 	private handleConnection(connection: peerjs.DataConnection): void {
-		const conn = new Connection(connection);
-		this.connections.add(conn);
-		conn.addEventListener("close", () => this.connections.delete(conn));
-		this.handler(conn);
+		connection.addListener("open", () => {
+			setTimeout(() => connection.close(), OPEN_TIMEOUT);
+			const conn = new Connection(connection);
+			this.connections.add(conn);
+			conn.addEventListener("close", () => this.connections.delete(conn));
+			this.handler(conn);
+		});
 	}
 
 	private awaitOpen(): Promise<void> {
@@ -107,6 +110,8 @@ class Connection extends EventTarget {
 
 	public async close(): Promise<void> {
 		this.connection.close();
+		await this.reader.cancel();
+		await this.writer.close();
 		await this.incomingStream.cancel();
 		await this.outgoingStream.close();
 	}
