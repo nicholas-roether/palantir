@@ -103,6 +103,10 @@ class Connection extends EventTarget {
 		this.writer = this.outgoingStream.getWriter();
 	}
 
+	public get remoteId(): string {
+		return this.connection.peer;
+	}
+
 	public async expectIncoming(timeout: number): Promise<Packet | null> {
 		const res = await promiseWithTimeout(this.reader.read(), null, timeout);
 		return res?.value ?? null;

@@ -8,6 +8,10 @@ import {
 	SessionCloseReason,
 	SessionStatusUpdateEvent
 } from "./session";
+import backgroundLogger from "./logger";
+import { describeSessionCloseReason } from "../common/enum_descriptions";
+
+const sessionManagerLogger = backgroundLogger.sub("sessionmanager");
 
 class ManagedSessionCloseEvent extends Event {
 	public readonly tabId: number;
@@ -46,12 +50,18 @@ class SessionManager extends EventTarget {
 	): Promise<ClientSession> {
 		const session = new ClientSession(hostId, accessToken);
 		await this.addSession(tabId, session);
+		sessionManagerLogger.info(
+			`Opened client session with host ${hostId} on tab ${tabId}`
+		);
 		return session;
 	}
 
 	public async openHostSession(tabId: number): Promise<HostSession> {
 		const session = new HostSession();
 		await this.addSession(tabId, session);
+		sessionManagerLogger.info(
+			`Opened host session with id ${await session.getId()} on tab ${tabId}`
+		);
 		return session;
 	}
 
@@ -76,10 +86,20 @@ class SessionManager extends EventTarget {
 			assertType(ty.instanceof(SessionCloseEvent), evt);
 			this.tabIdSessionMap.delete(tabId);
 			this.dispatchEvent(new ManagedSessionCloseEvent(tabId, evt.reason));
+			sessionManagerLogger.info(
+				`Closed session on tab ${tabId}: ${describeSessionCloseReason(
+					evt.reason
+				)}`
+			);
 		});
 
 		session.addEventListener("statusupdate", (evt) => {
 			assertType(ty.instanceof(SessionStatusUpdateEvent), evt);
+			sessionManagerLogger.debug(
+				`Status update for session on tab ${tabId}: ${JSON.stringify(
+					evt.status
+				)}`
+			);
 			this.broadcastSessionStatus(tabId, evt.status);
 		});
 

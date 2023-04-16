@@ -44,6 +44,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lifeboat", "npm:1.3.2"],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
+            ["simlo", "npm:1.0.0"],\
             ["solid-js", "npm:1.7.3"],\
             ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
             ["ts-loader", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:9.4.2"],\
@@ -4844,6 +4845,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lifeboat", "npm:1.3.2"],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
+            ["simlo", "npm:1.0.0"],\
             ["solid-js", "npm:1.7.3"],\
             ["solid-styled-components", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:0.28.5"],\
             ["ts-loader", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:9.4.2"],\
@@ -5268,6 +5270,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/shebang-regex-npm-3.0.0-899a0cd65e-1a2bcae50d.zip/node_modules/shebang-regex/",\
           "packageDependencies": [\
             ["shebang-regex", "npm:3.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["simlo", [\
+        ["npm:1.0.0", {\
+          "packageLocation": "./.yarn/cache/simlo-npm-1.0.0-d67baa973b-2d579d3ac6.zip/node_modules/simlo/",\
+          "packageDependencies": [\
+            ["simlo", "npm:1.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
