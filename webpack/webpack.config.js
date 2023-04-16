@@ -5,8 +5,9 @@ const CopyPlugin = require("copy-webpack-plugin");
 const wd = path.resolve(__dirname, "..");
 const src = path.join(wd, "src");
 
-module.exports = {
-	mode: "production",
+module.exports = (env) => ({
+	mode: env.production ? "production" : "development",
+	devtool: env.production ? undefined : "source-map",
 	entry: {
 		popup: path.join(src, "popup"),
 		content: path.join(src, "content"),
@@ -43,4 +44,4 @@ module.exports = {
 			]
 		})
 	]
-}
+})
