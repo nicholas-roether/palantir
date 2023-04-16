@@ -74,10 +74,16 @@ const enum SessionType {
 	CLIENT
 }
 
+const enum ConnectionState {
+	CONNECTING,
+	CONNECTED
+}
+
 interface SessionStatus {
 	type: SessionType;
 	hostId: string;
 	accessToken: string;
+	connectionState: ConnectionState;
 }
 
 class SessionStatusUpdateMessage {
@@ -97,7 +103,8 @@ const enum SessionCloseReason {
 	DISCONNECTED,
 	SUPERSEDED,
 	TAB_CLOSED,
-	CLOSED_BY_USER
+	CLOSED_BY_USER,
+	TIMEOUT
 }
 
 class SessionClosedMessage {
@@ -132,6 +139,7 @@ export {
 	CloseSessionMessage,
 	GetSessionStatusMessage,
 	SessionType,
+	ConnectionState,
 	SessionStatus,
 	SessionStatusUpdateMessage,
 	SessionCloseReason,

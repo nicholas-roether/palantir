@@ -1,4 +1,5 @@
 import {
+	ConnectionState,
 	SessionCloseReason,
 	SessionStatus,
 	SessionType
@@ -46,26 +47,37 @@ abstract class Session extends EventTarget {
 	}
 }
 
+const CONNECTION_TIMEOUT = 5000; // ms
+
 class ClientSession extends Session {
 	public readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
+	private connectionState = ConnectionState.CONNECTING;
 
 	constructor(hostId: string, accessToken: string) {
 		super();
 		this.hostId = hostId;
 		this.auth = new ClientSessionAuth(accessToken);
 		this.peer.connectTo(hostId);
+
+		setTimeout(() => {
+			if (this.connectionState != ConnectionState.CONNECTED) {
+				this.close(SessionCloseReason.TIMEOUT);
+			}
+		}, CONNECTION_TIMEOUT);
 	}
 
 	public async getStatus(): Promise<SessionStatus> {
 		return {
 			type: SessionType.CLIENT,
 			hostId: this.hostId,
-			accessToken: this.auth.accessToken
+			accessToken: this.auth.accessToken,
+			connectionState: this.connectionState
 		};
 	}
 
 	protected async handleConnection(connection: Connection): Promise<void> {
+		this.connectionState = ConnectionState.CONNECTED;
 		if (!(await this.auth.authenticate(connection))) {
 			await this.close(SessionCloseReason.UNAUTHORIZED);
 			return;
@@ -96,7 +108,8 @@ class HostSession extends Session {
 		return {
 			type: SessionType.HOST,
 			hostId: await this.getId(),
-			accessToken: this.auth.accessToken
+			accessToken: this.auth.accessToken,
+			connectionState: ConnectionState.CONNECTED
 		};
 	}
 
