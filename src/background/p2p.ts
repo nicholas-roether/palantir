@@ -20,6 +20,7 @@ class Peer {
 	private readonly handler: ConnectionHandler;
 	private readonly connections: Set<Connection>;
 	private readonly openPromise: Promise<void>;
+	private listening = false;
 
 	constructor(handler: ConnectionHandler) {
 		p2pLogger.debug("Opening new peer...");
@@ -29,6 +30,20 @@ class Peer {
 		this.connections = new Set();
 
 		this.openPromise = this.awaitOpen().catch(() => this.close());
+
+		this.peer.on("connection", async (conn) => {
+			if (!this.listening) {
+				await conn.close();
+				return;
+			}
+
+			p2pLogger.debug(
+				`Peer ${await this.getId()} received incoming connection from ${
+					conn.peer
+				}`
+			);
+			this.handleConnection(conn);
+		});
 	}
 
 	public async getId(): Promise<string> {
@@ -40,14 +55,8 @@ class Peer {
 		p2pLogger.debug(
 			`Peer ${await this.getId()} is listening for incoming connections`
 		);
-		this.peer.on("connection", async (conn) => {
-			p2pLogger.debug(
-				`Peer ${await this.getId()} received incoming connection from ${
-					conn.peer
-				}`
-			);
-			this.handleConnection(conn);
-		});
+
+		this.listening = true;
 	}
 
 	public async connectTo(remoteId: string): Promise<void> {
