@@ -94,6 +94,7 @@ class HostSession extends Session {
 	constructor() {
 		super();
 		this.auth = new HostSessionAuth();
+		this.peer.listen();
 	}
 
 	public async getId(): Promise<string> {
