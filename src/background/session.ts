@@ -44,8 +44,8 @@ abstract class Session extends EventTarget {
 		this.peer = new Peer((conn) => this.handleConnection(conn));
 	}
 
-	public async close(reason: SessionCloseReason): Promise<void> {
-		await this.peer.close();
+	public close(reason: SessionCloseReason): void {
+		this.peer.close();
 		this.dispatchEvent(new SessionCloseEvent(reason));
 	}
 
@@ -93,7 +93,7 @@ class ClientSession extends Session {
 	protected async handleConnection(connection: Connection): Promise<void> {
 		this.connectionState = ConnectionState.CONNECTED;
 		if (!(await this.auth.authenticate(connection))) {
-			await this.close(SessionCloseReason.UNAUTHORIZED);
+			this.close(SessionCloseReason.UNAUTHORIZED);
 			return;
 		}
 		connection.addEventListener("close", () =>
@@ -133,7 +133,7 @@ class HostSession extends Session {
 
 	protected async handleConnection(connection: Connection): Promise<void> {
 		if (!(await this.auth.checkAuth(connection))) {
-			await connection.close();
+			connection.close();
 			return;
 		}
 	}
