@@ -56,7 +56,7 @@ class HostSessionAuth {
 			return false;
 		}
 
-		await connection.writer.write({ type: PacketType.AUTH_ACK });
+		await connection.outgoing.send({ type: PacketType.AUTH_ACK });
 		authLogger.info(
 			`Connection from ${connection.remoteId} successfully authenticated`
 		);
@@ -76,7 +76,7 @@ class ClientSessionAuth {
 			`Attempting to authenticate to host ${connection.remoteId}...`
 		);
 
-		await connection.writer.write({
+		await connection.outgoing.send({
 			type: PacketType.AUTH_TOKEN,
 			token: this.accessToken
 		});
