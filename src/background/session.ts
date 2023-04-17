@@ -99,6 +99,8 @@ class ClientSession extends Session {
 
 	protected async handleConnection(connection: Connection): Promise<void> {
 		this.connectionState = ConnectionState.CONNECTED;
+		this.broadcastStatusUpdate();
+
 		if (!(await this.auth.authenticate(connection))) {
 			this.close(SessionCloseReason.UNAUTHORIZED);
 			return;
