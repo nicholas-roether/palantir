@@ -12,6 +12,7 @@ import { Connection, Peer } from "./p2p";
 const sessionUpdatePacketSchema = ty.object({
 	users: ty.array(
 		ty.object({
+			name: ty.string(),
 			role: ty.enum(UserRole.GUEST, UserRole.HOST)
 		})
 	)
