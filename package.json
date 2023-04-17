@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "base64-arraybuffer": "^1.0.2",
-    "lifeboat": "^1.3.2",
+    "lifeboat": "^1.3.3",
     "peerjs": "^1.4.7",
     "simlo": "^1.0.0",
     "solid-js": "^1.7.3",

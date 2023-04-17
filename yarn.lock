@@ -3048,10 +3048,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lifeboat@npm:^1.3.2":
-  version: 1.3.2
-  resolution: "lifeboat@npm:1.3.2"
-  checksum: e1e64a17d42af233e3d5a338dfd6233beec96a6122890603c71abd51fffc10c744117a1098f22092c61ef3722638d7210cc573abf720d1d054ba58d36ca7bc74
+"lifeboat@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "lifeboat@npm:1.3.3"
+  checksum: 547f9b1ee610186ecfbc8a5dc8435b7259bfdbfd93654b797b71aa29fa5cceb216297494548deb1c570c515180e03bd1d593c18e38562b298bf298adf9fee62e
   languageName: node
   linkType: hard
 
@@ -3295,7 +3295,7 @@ __metadata:
     copy-webpack-plugin: ^11.0.0
     eslint: ^8.38.0
     eslint-config-prettier: ^8.8.0
-    lifeboat: ^1.3.2
+    lifeboat: ^1.3.3
     peerjs: ^1.4.7
     prettier: ^2.8.7
     simlo: ^1.0.0
