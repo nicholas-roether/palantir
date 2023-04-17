@@ -44,14 +44,18 @@ async function sendSessionClosed(
 	await browser.runtime.sendMessage(new SessionClosedMessage(tabId, reason));
 }
 
+// TODO pass through message
+const TEST_USER = "Test User";
+
 browser.runtime.onMessage.addListener(async (message: Message) => {
 	switch (message.type) {
 		case MessageType.CREATE_HOST_SESSION:
-			sessionManager.openHostSession(message.tabId);
+			sessionManager.openHostSession(message.tabId, TEST_USER);
 			break;
 		case MessageType.CREATE_CLIENT_SESSION:
 			sessionManager.openClientSession(
 				message.tabId,
+				TEST_USER,
 				message.hostId,
 				message.accessToken
 			);
