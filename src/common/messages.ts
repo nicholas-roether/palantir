@@ -79,11 +79,22 @@ const enum ConnectionState {
 	CONNECTED
 }
 
+const enum UserRole {
+	HOST,
+	GUEST
+}
+
+interface User {
+	name: string;
+	role: UserRole;
+}
+
 interface SessionStatus {
 	type: SessionType;
 	hostId: string;
 	accessToken: string;
 	connectionState: ConnectionState;
+	users: User[];
 }
 
 class SessionStatusUpdateMessage {
@@ -140,6 +151,8 @@ export {
 	GetSessionStatusMessage,
 	SessionType,
 	ConnectionState,
+	UserRole,
+	User,
 	SessionStatus,
 	SessionStatusUpdateMessage,
 	SessionCloseReason,

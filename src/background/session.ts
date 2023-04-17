@@ -1,11 +1,21 @@
+import ty from "lifeboat";
 import {
 	ConnectionState,
 	SessionCloseReason,
 	SessionStatus,
-	SessionType
+	SessionType,
+	UserRole
 } from "../common/messages";
 import { ClientSessionAuth, HostSessionAuth } from "./auth";
 import { Connection, Peer } from "./p2p";
+
+const sessionUpdatePacketSchema = ty.object({
+	users: ty.array(
+		ty.object({
+			role: ty.enum(UserRole.GUEST, UserRole.HOST)
+		})
+	)
+});
 
 class SessionCloseEvent extends Event {
 	public readonly reason: SessionCloseReason;
@@ -50,12 +60,14 @@ abstract class Session extends EventTarget {
 const CONNECTION_TIMEOUT = 5000; // ms
 
 class ClientSession extends Session {
+	public readonly username: string;
 	public readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
 	private connectionState = ConnectionState.CONNECTING;
 
-	constructor(hostId: string, accessToken: string) {
+	constructor(username: string, hostId: string, accessToken: string) {
 		super();
+		this.username = username;
 		this.hostId = hostId;
 		this.auth = new ClientSessionAuth(accessToken);
 		this.peer.connectTo(hostId);
@@ -72,7 +84,8 @@ class ClientSession extends Session {
 			type: SessionType.CLIENT,
 			hostId: this.hostId,
 			accessToken: this.auth.accessToken,
-			connectionState: this.connectionState
+			connectionState: this.connectionState,
+			users: []
 		};
 	}
 
@@ -89,11 +102,13 @@ class ClientSession extends Session {
 }
 
 class HostSession extends Session {
+	public readonly username: string;
 	private readonly auth: HostSessionAuth;
 
-	constructor() {
+	constructor(username: string) {
 		super();
 		this.auth = new HostSessionAuth();
+		this.username = username;
 		this.peer.listen();
 	}
 
@@ -110,7 +125,8 @@ class HostSession extends Session {
 			type: SessionType.HOST,
 			hostId: await this.getId(),
 			accessToken: this.auth.accessToken,
-			connectionState: ConnectionState.CONNECTED
+			connectionState: ConnectionState.CONNECTED,
+			users: []
 		};
 	}
 
