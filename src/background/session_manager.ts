@@ -45,10 +45,11 @@ class SessionManager extends EventTarget {
 
 	public async openClientSession(
 		tabId: number,
+		username: string,
 		hostId: string,
 		accessToken: string
 	): Promise<ClientSession> {
-		const session = new ClientSession(hostId, accessToken);
+		const session = new ClientSession(username, hostId, accessToken);
 		this.addSession(tabId, session);
 		sessionManagerLogger.info(
 			`Opened client session with host ${hostId} on tab ${tabId}`
@@ -56,8 +57,11 @@ class SessionManager extends EventTarget {
 		return session;
 	}
 
-	public async openHostSession(tabId: number): Promise<HostSession> {
-		const session = new HostSession();
+	public async openHostSession(
+		tabId: number,
+		username: string
+	): Promise<HostSession> {
+		const session = new HostSession(username);
 		this.addSession(tabId, session);
 		sessionManagerLogger.info(
 			`Opened host session with id ${await session.getId()} on tab ${tabId}`
@@ -75,7 +79,7 @@ class SessionManager extends EventTarget {
 		session.close(reason);
 	}
 
-	private addSession(tabId: number, session: Session): void {
+	private async addSession(tabId: number, session: Session): Promise<void> {
 		this.closeSession(tabId, SessionCloseReason.SUPERSEDED);
 		this.tabIdSessionMap.set(tabId, session);
 
