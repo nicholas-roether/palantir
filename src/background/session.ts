@@ -1,13 +1,18 @@
-import ty from "lifeboat";
+import ty, { checkType } from "lifeboat";
 import {
 	ConnectionState,
 	SessionCloseReason,
 	SessionStatus,
 	SessionType,
+	User,
 	UserRole
 } from "../common/messages";
 import { ClientSessionAuth, HostSessionAuth } from "./auth";
 import { Connection, Peer } from "./p2p";
+import PacketType from "./packets";
+import backgroundLogger from "./logger";
+
+const sessionLogger = backgroundLogger.sub("session");
 
 const sessionUpdatePacketSchema = ty.object({
 	users: ty.array(
@@ -65,11 +70,13 @@ class ClientSession extends Session {
 	public readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
 	private connectionState = ConnectionState.CONNECTING;
+	private users: User[];
 
 	constructor(username: string, hostId: string, accessToken: string) {
 		super();
 		this.username = username;
 		this.hostId = hostId;
+		this.users = [{ role: UserRole.GUEST, name: this.username }];
 		this.auth = new ClientSessionAuth(accessToken);
 		this.peer.connectTo(hostId);
 
@@ -86,7 +93,7 @@ class ClientSession extends Session {
 			hostId: this.hostId,
 			accessToken: this.auth.accessToken,
 			connectionState: this.connectionState,
-			users: []
+			users: this.users
 		};
 	}
 
@@ -99,17 +106,39 @@ class ClientSession extends Session {
 		connection.addEventListener("close", () =>
 			this.close(SessionCloseReason.DISCONNECTED)
 		);
+
+		await this.listen(connection);
+	}
+
+	private async listen(connection: Connection): Promise<void> {
+		for await (const packet of connection.incoming) {
+			if (packet.type != PacketType.SESSION_UPDATE) {
+				sessionLogger.warn(
+					`Client session received packet of unexpected type ${packet.type}`
+				);
+				continue;
+			}
+			if (!checkType(sessionUpdatePacketSchema, packet)) {
+				sessionLogger.error(
+					`Client session received malformed session update packet: ${sessionUpdatePacketSchema.reason}`
+				);
+				continue;
+			}
+			this.users = packet.users;
+		}
 	}
 }
 
 class HostSession extends Session {
 	public readonly username: string;
 	private readonly auth: HostSessionAuth;
+	private readonly connections: Set<Connection>;
 
 	constructor(username: string) {
 		super();
 		this.auth = new HostSessionAuth();
 		this.username = username;
+		this.connections = new Set();
 		this.peer.listen();
 	}
 
@@ -136,6 +165,10 @@ class HostSession extends Session {
 			connection.close();
 			return;
 		}
+		this.connections.add(connection);
+		connection.addEventListener("close", () =>
+			this.connections.delete(connection)
+		);
 	}
 }
 
