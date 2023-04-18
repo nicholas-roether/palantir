@@ -9,7 +9,8 @@ const authLogger = backgroundLogger.sub("auth");
 const TOKEN_SIZE = 24;
 const RESPONSE_TIMEOUT = 5000; // ms
 
-const authTokenPacketSchema = ty.object({
+const authPacketSchema = ty.object({
+	username: ty.string(),
 	token: ty.string()
 });
 
@@ -19,6 +20,17 @@ function generateToken(): string {
 	return encode(array.buffer);
 }
 
+interface AuthFailure {
+	success: false;
+}
+
+interface AuthSuccess {
+	success: true;
+	username: string;
+}
+
+type AuthResult = AuthFailure | AuthSuccess;
+
 class HostSessionAuth {
 	public readonly accessToken: string;
 
@@ -26,49 +38,51 @@ class HostSessionAuth {
 		this.accessToken = generateToken();
 	}
 
-	public async checkAuth(connection: Connection): Promise<boolean> {
+	public async checkAuth(connection: Connection): Promise<AuthResult> {
 		authLogger.info(`Authenticating connection from ${connection.remoteId}...`);
 
 		const res = await connection.expectIncoming(RESPONSE_TIMEOUT);
 		if (!res) {
 			authLogger.error(`Authentication of ${connection.remoteId} timed out`);
-			return false;
+			return { success: false };
 		}
 
 		if (res.type != PacketType.AUTH_TOKEN) {
 			authLogger.error(
 				`${connection.remoteId} sent packet of invalid type ${res.type}, expected ${PacketType.AUTH_TOKEN}`
 			);
-			return false;
+			return { success: false };
 		}
 
-		if (!checkType(authTokenPacketSchema, res)) {
+		if (!checkType(authPacketSchema, res)) {
 			authLogger.error(
-				`Received malformed auth token packet from ${connection.remoteId}: ${authTokenPacketSchema.reason}`
+				`Received malformed auth token packet from ${connection.remoteId}: ${authPacketSchema.reason}`
 			);
-			return false;
+			return { success: false };
 		}
 
 		if (res.token != this.accessToken) {
 			authLogger.info(
 				`Connection from ${connection.remoteId} refused: incorrect access token`
 			);
-			return false;
+			return { success: false };
 		}
 
 		await connection.outgoing.send({ type: PacketType.AUTH_ACK });
 		authLogger.info(
 			`Connection from ${connection.remoteId} successfully authenticated`
 		);
-		return true;
+		return { success: true, username: res.username };
 	}
 }
 
 class ClientSessionAuth {
 	public readonly accessToken: string;
+	public readonly username: string;
 
-	constructor(accessToken: string) {
+	constructor(username: string, accessToken: string) {
 		this.accessToken = accessToken;
+		this.username = username;
 	}
 
 	public async authenticate(connection: Connection): Promise<boolean> {
@@ -78,7 +92,8 @@ class ClientSessionAuth {
 
 		await connection.outgoing.send({
 			type: PacketType.AUTH_TOKEN,
-			token: this.accessToken
+			token: this.accessToken,
+			username: this.username
 		});
 
 		const res = await connection.expectIncoming(RESPONSE_TIMEOUT);

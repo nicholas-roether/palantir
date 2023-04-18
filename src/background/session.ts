@@ -77,7 +77,7 @@ class ClientSession extends Session {
 		this.username = username;
 		this.hostId = hostId;
 		this.users = [{ role: UserRole.GUEST, name: this.username }];
-		this.auth = new ClientSessionAuth(accessToken);
+		this.auth = new ClientSessionAuth(username, accessToken);
 		this.peer.connectTo(hostId);
 
 		setTimeout(() => {
@@ -131,16 +131,21 @@ class ClientSession extends Session {
 	}
 }
 
+interface ConnectedUser {
+	username: string;
+	connection: Connection;
+}
+
 class HostSession extends Session {
 	public readonly username: string;
 	private readonly auth: HostSessionAuth;
-	private readonly connections: Set<Connection>;
+	private readonly connectedUsers: Set<ConnectedUser>;
 
 	constructor(username: string) {
 		super();
 		this.auth = new HostSessionAuth();
 		this.username = username;
-		this.connections = new Set();
+		this.connectedUsers = new Set();
 		this.peer.listen();
 	}
 
@@ -158,19 +163,43 @@ class HostSession extends Session {
 			hostId: await this.getId(),
 			accessToken: this.auth.accessToken,
 			connectionState: ConnectionState.CONNECTED,
-			users: []
+			users: this.getUsers()
 		};
 	}
 
 	protected async handleConnection(connection: Connection): Promise<void> {
-		if (!(await this.auth.checkAuth(connection))) {
+		const res = await this.auth.checkAuth(connection);
+		if (!res.success) {
 			connection.close();
 			return;
 		}
-		this.connections.add(connection);
-		connection.addEventListener("close", () =>
-			this.connections.delete(connection)
-		);
+
+		const user: ConnectedUser = { username: res.username, connection };
+		this.connectedUsers.add(user);
+		await this.broadcastStatusUpdate();
+
+		connection.addEventListener("close", async () => {
+			this.connectedUsers.delete(user);
+			await this.broadcastStatusUpdate();
+		});
+	}
+
+	protected async broadcastStatusUpdate(): Promise<void> {
+		await super.broadcastStatusUpdate();
+		for (const connectedUser of this.connectedUsers) {
+			connectedUser.connection.outgoing.send({
+				type: PacketType.SESSION_UPDATE,
+				users: this.getUsers()
+			});
+		}
+	}
+
+	private getUsers(): User[] {
+		const users: User[] = [{ role: UserRole.HOST, name: this.username }];
+		for (const connectedUser of this.connectedUsers) {
+			users.push({ role: UserRole.GUEST, name: connectedUser.username });
+		}
+		return users;
 	}
 }
 
