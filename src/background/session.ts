@@ -200,15 +200,16 @@ class HostSession extends Session {
 		const user: ConnectedUser = { username: res.username, connection };
 		this.connectedUsers.add(user);
 		await this.broadcastStatusUpdate();
+		await this.sendSessionUpdatePackets();
 
 		connection.events.on(ConnectionEventType.CLOSED, async () => {
 			this.connectedUsers.delete(user);
 			await this.broadcastStatusUpdate();
+			await this.sendSessionUpdatePackets();
 		});
 	}
 
-	protected async broadcastStatusUpdate(): Promise<void> {
-		await super.broadcastStatusUpdate();
+	private async sendSessionUpdatePackets(): Promise<void> {
 		for (const connectedUser of this.connectedUsers) {
 			connectedUser.connection.outgoing.send({
 				type: PacketType.SESSION_UPDATE,
