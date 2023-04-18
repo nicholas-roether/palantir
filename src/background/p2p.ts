@@ -8,6 +8,11 @@ import {
 	OutputStream,
 	OutputStreamController
 } from "../common/streams";
+import {
+	EventStream,
+	EventStreamController,
+	StreamEvent
+} from "../common/events";
 
 const p2pLogger = backgroundLogger.sub("p2p");
 
@@ -90,7 +95,9 @@ class Peer {
 			p2pLogger.debug(`Connection with ${connection.peer} opened`);
 			const conn = new Connection(connection);
 			this.connections.add(conn);
-			conn.addEventListener("close", () => this.connections.delete(conn));
+			conn.events.on(ConnectionEventType.CLOSED, () =>
+				this.connections.delete(conn)
+			);
 			this.handler(conn);
 		});
 	}
@@ -110,22 +117,30 @@ class Peer {
 	}
 }
 
-class ConnectionCloseEvent extends Event {
-	constructor() {
-		super("close");
-	}
+const enum ConnectionEventType {
+	CLOSED
 }
 
-class Connection extends EventTarget {
+class ConnectionCloseEvent implements StreamEvent<ConnectionEventType.CLOSED> {
+	public readonly type = ConnectionEventType.CLOSED;
+}
+
+type ConnectionEvent = ConnectionCloseEvent;
+
+class Connection {
 	public readonly incoming: InputStream<Packet>;
 	public readonly outgoing: OutputStream<Packet>;
+	public readonly events: EventStream<ConnectionEventType, ConnectionEvent>;
 
 	private readonly connection: peerjs.DataConnection;
 	private readonly incomingStreamController: InputStreamController<Packet>;
 	private readonly outgoingStreamController: OutputStreamController<Packet>;
+	private readonly eventStreamController: EventStreamController<
+		ConnectionEventType,
+		ConnectionEvent
+	>;
 
 	constructor(connection: peerjs.DataConnection) {
-		super();
 		this.connection = connection;
 		this.connection.on("data", (data) => this.onData(data));
 		this.connection.on("close", () => this.onClose());
@@ -138,6 +153,9 @@ class Connection extends EventTarget {
 			this.sendData(packet)
 		);
 		this.outgoing = this.outgoingStreamController.createStream();
+
+		this.eventStreamController = new EventStreamController();
+		this.events = this.eventStreamController.createStream();
 	}
 
 	public get remoteId(): string {
@@ -173,7 +191,7 @@ class Connection extends EventTarget {
 
 		this.incomingStreamController.close();
 		this.outgoingStreamController.close();
-		this.dispatchEvent(new ConnectionCloseEvent());
+		this.eventStreamController.emit(new ConnectionCloseEvent());
 	}
 
 	private onError(err: Error): void {
@@ -184,5 +202,11 @@ class Connection extends EventTarget {
 	}
 }
 
-export { Connection, Peer, ConnectionHandler };
+export {
+	Connection,
+	ConnectionEventType,
+	ConnectionCloseEvent,
+	Peer,
+	ConnectionHandler
+};
 console.error;

@@ -8,9 +8,14 @@ import {
 	UserRole
 } from "../common/messages";
 import { ClientSessionAuth, HostSessionAuth } from "./auth";
-import { Connection, Peer } from "./p2p";
+import { Connection, ConnectionEventType, Peer } from "./p2p";
 import PacketType from "./packets";
 import backgroundLogger from "./logger";
+import {
+	EventStream,
+	EventStreamController,
+	StreamEvent
+} from "../common/events";
 
 const sessionLogger = backgroundLogger.sub("session");
 
@@ -23,35 +28,51 @@ const sessionUpdatePacketSchema = ty.object({
 	)
 });
 
-class SessionCloseEvent extends Event {
+const enum SessionEventType {
+	CLOSED,
+	STATUS_UPDATE
+}
+
+class SessionCloseEvent implements StreamEvent<SessionEventType.CLOSED> {
+	public readonly type = SessionEventType.CLOSED;
 	public readonly reason: SessionCloseReason;
 
 	constructor(reason: SessionCloseReason) {
-		super("close");
 		this.reason = reason;
 	}
 }
 
-class SessionStatusUpdateEvent extends Event {
+class SessionStatusUpdateEvent
+	implements StreamEvent<SessionEventType.STATUS_UPDATE>
+{
+	public readonly type = SessionEventType.STATUS_UPDATE;
 	public readonly status: SessionStatus;
 
 	constructor(status: SessionStatus) {
-		super("statusupdate");
 		this.status = status;
 	}
 }
 
-abstract class Session extends EventTarget {
+type SessionEvent = SessionCloseEvent | SessionStatusUpdateEvent;
+
+abstract class Session {
+	public readonly events: EventStream<SessionEventType, SessionEvent>;
+
 	protected readonly peer: Peer;
+	private readonly eventsController: EventStreamController<
+		SessionEventType,
+		SessionEvent
+	>;
 
 	constructor() {
-		super();
 		this.peer = new Peer((conn) => this.handleConnection(conn));
+		this.eventsController = new EventStreamController();
+		this.events = this.eventsController.createStream();
 	}
 
 	public close(reason: SessionCloseReason): void {
 		this.peer.close();
-		this.dispatchEvent(new SessionCloseEvent(reason));
+		this.eventsController.emit(new SessionCloseEvent(reason));
 	}
 
 	public abstract getStatus(): Promise<SessionStatus>;
@@ -59,7 +80,9 @@ abstract class Session extends EventTarget {
 	protected abstract handleConnection(connection: Connection): Promise<void>;
 
 	protected async broadcastStatusUpdate(): Promise<void> {
-		this.dispatchEvent(new SessionStatusUpdateEvent(await this.getStatus()));
+		this.eventsController.emit(
+			new SessionStatusUpdateEvent(await this.getStatus())
+		);
 	}
 }
 
@@ -105,7 +128,7 @@ class ClientSession extends Session {
 			this.close(SessionCloseReason.UNAUTHORIZED);
 			return;
 		}
-		connection.addEventListener("close", () =>
+		connection.events.on(ConnectionEventType.CLOSED, () =>
 			this.close(SessionCloseReason.DISCONNECTED)
 		);
 
@@ -178,7 +201,7 @@ class HostSession extends Session {
 		this.connectedUsers.add(user);
 		await this.broadcastStatusUpdate();
 
-		connection.addEventListener("close", async () => {
+		connection.events.on(ConnectionEventType.CLOSED, async () => {
 			this.connectedUsers.delete(user);
 			await this.broadcastStatusUpdate();
 		});
@@ -208,6 +231,7 @@ export {
 	ClientSession,
 	HostSession,
 	SessionCloseReason,
+	SessionEventType,
 	SessionCloseEvent,
 	SessionStatusUpdateEvent
 };

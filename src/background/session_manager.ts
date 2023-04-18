@@ -1,46 +1,62 @@
-import ty, { assertType } from "lifeboat";
 import { SessionStatus } from "../common/messages";
 import {
 	ClientSession,
 	HostSession,
 	Session,
-	SessionCloseEvent,
 	SessionCloseReason,
-	SessionStatusUpdateEvent
+	SessionEventType
 } from "./session";
 import backgroundLogger from "./logger";
 import { describeSessionCloseReason } from "../common/enum_descriptions";
+import {
+	EventStream,
+	EventStreamController,
+	StreamEvent
+} from "../common/events";
 
 const sessionManagerLogger = backgroundLogger.sub("sessionmanager");
 
-class ManagedSessionCloseEvent extends Event {
+class ManagedSessionCloseEvent implements StreamEvent<SessionEventType.CLOSED> {
+	public readonly type = SessionEventType.CLOSED;
 	public readonly tabId: number;
 	public readonly reason: SessionCloseReason;
 
 	constructor(tabId: number, reason: SessionCloseReason) {
-		super("close");
 		this.tabId = tabId;
 		this.reason = reason;
 	}
 }
 
-class ManagedSessionStatusUpdateEvent extends Event {
+class ManagedSessionStatusUpdateEvent
+	implements StreamEvent<SessionEventType.STATUS_UPDATE>
+{
+	public readonly type = SessionEventType.STATUS_UPDATE;
 	public readonly tabId: number;
 	public readonly status: SessionStatus;
 
 	constructor(tabId: number, status: SessionStatus) {
-		super("statusupdate");
 		this.tabId = tabId;
 		this.status = status;
 	}
 }
 
-class SessionManager extends EventTarget {
+type SessionManagerEvent =
+	| ManagedSessionCloseEvent
+	| ManagedSessionStatusUpdateEvent;
+
+class SessionManager {
+	public readonly events: EventStream<SessionEventType, SessionManagerEvent>;
+
 	private readonly tabIdSessionMap: Map<number, Session>;
+	private readonly eventsController: EventStreamController<
+		SessionEventType,
+		SessionManagerEvent
+	>;
 
 	constructor() {
-		super();
 		this.tabIdSessionMap = new Map();
+		this.eventsController = new EventStreamController();
+		this.events = this.eventsController.createStream();
 	}
 
 	public async openClientSession(
@@ -83,10 +99,11 @@ class SessionManager extends EventTarget {
 		this.closeSession(tabId, SessionCloseReason.SUPERSEDED);
 		this.tabIdSessionMap.set(tabId, session);
 
-		session.addEventListener("close", (evt) => {
-			assertType(ty.instanceof(SessionCloseEvent), evt);
+		session.events.on(SessionEventType.CLOSED, (evt) => {
 			this.tabIdSessionMap.delete(tabId);
-			this.dispatchEvent(new ManagedSessionCloseEvent(tabId, evt.reason));
+			this.eventsController.emit(
+				new ManagedSessionCloseEvent(tabId, evt.reason)
+			);
 			sessionManagerLogger.info(
 				`Closed session on tab ${tabId}: ${describeSessionCloseReason(
 					evt.reason
@@ -94,8 +111,7 @@ class SessionManager extends EventTarget {
 			);
 		});
 
-		session.addEventListener("statusupdate", (evt) => {
-			assertType(ty.instanceof(SessionStatusUpdateEvent), evt);
+		session.events.on(SessionEventType.STATUS_UPDATE, (evt) => {
 			sessionManagerLogger.debug(
 				`Status update for session on tab ${tabId}: ${JSON.stringify(
 					evt.status
@@ -108,7 +124,9 @@ class SessionManager extends EventTarget {
 	}
 
 	private broadcastSessionStatus(tabId: number, status: SessionStatus): void {
-		this.dispatchEvent(new ManagedSessionStatusUpdateEvent(tabId, status));
+		this.eventsController.emit(
+			new ManagedSessionStatusUpdateEvent(tabId, status)
+		);
 	}
 }
 

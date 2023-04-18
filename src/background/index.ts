@@ -1,4 +1,3 @@
-import ty, { assertType } from "lifeboat";
 import {
 	SessionStatus,
 	Message,
@@ -7,20 +6,16 @@ import {
 	SessionCloseReason,
 	SessionClosedMessage
 } from "../common/messages";
-import SessionManager, {
-	ManagedSessionCloseEvent,
-	ManagedSessionStatusUpdateEvent
-} from "./session_manager";
+import SessionManager from "./session_manager";
+import { SessionEventType } from "./session";
 
 const sessionManager = new SessionManager();
 
-sessionManager.addEventListener("statusupdate", (evt) => {
-	assertType(ty.instanceof(ManagedSessionStatusUpdateEvent), evt);
+sessionManager.events.on(SessionEventType.STATUS_UPDATE, (evt) => {
 	sendSessionStatusUpdate(evt.tabId, evt.status);
 });
 
-sessionManager.addEventListener("close", (evt) => {
-	assertType(ty.instanceof(ManagedSessionCloseEvent), evt);
+sessionManager.events.on(SessionEventType.CLOSED, (evt) => {
 	sendSessionClosed(evt.tabId, evt.reason);
 });
 
