@@ -75,6 +75,7 @@ const enum SessionType {
 }
 
 const enum ConnectionState {
+	DISCONNECTED,
 	CONNECTING,
 	CONNECTED
 }

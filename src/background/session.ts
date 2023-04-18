@@ -121,6 +121,14 @@ class ClientSession extends Session {
 	}
 
 	protected async handleConnection(connection: Connection): Promise<void> {
+		if (this.connectionState != ConnectionState.CONNECTING) {
+			sessionLogger.warn(
+				`A connection with host ${connection.remoteId} was started on a client session that was not connecting!`
+			);
+			connection.close();
+			return;
+		}
+
 		this.connectionState = ConnectionState.CONNECTED;
 		this.broadcastStatusUpdate();
 
@@ -133,6 +141,11 @@ class ClientSession extends Session {
 		);
 
 		await this.listen(connection);
+	}
+
+	public close(reason: SessionCloseReason): void {
+		super.close(reason);
+		this.connectionState = ConnectionState.DISCONNECTED;
 	}
 
 	private async listen(connection: Connection): Promise<void> {
