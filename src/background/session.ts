@@ -149,6 +149,7 @@ class ClientSession extends Session {
 				);
 				continue;
 			}
+			sessionLogger.debug(`Client session received a session status update`);
 			this.users = packet.users;
 		}
 	}
@@ -196,6 +197,9 @@ class HostSession extends Session {
 			connection.close();
 			return;
 		}
+		sessionLogger.info(
+			`User ${res.username} connected to host session ${await this.getId()}`
+		);
 
 		const user: ConnectedUser = { username: res.username, connection };
 		this.connectedUsers.add(user);
@@ -206,10 +210,19 @@ class HostSession extends Session {
 			this.connectedUsers.delete(user);
 			await this.broadcastStatusUpdate();
 			await this.sendSessionUpdatePackets();
+
+			sessionLogger.info(
+				`User ${
+					res.username
+				} disconnected from host session ${await this.getId()}`
+			);
 		});
 	}
 
 	private async sendSessionUpdatePackets(): Promise<void> {
+		sessionLogger.debug(
+			`Host session ${await this.getId()} is broadcasting a session status update`
+		);
 		for (const connectedUser of this.connectedUsers) {
 			connectedUser.connection.outgoing.send({
 				type: PacketType.SESSION_UPDATE,
