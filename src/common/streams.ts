@@ -40,24 +40,11 @@ class Channel<T> implements AsyncIterator<T, void, void>, AsyncIterable<T> {
 	}
 }
 
-class InputStreamLockedError extends Error {
-	constructor() {
-		super(
-			"Cannot read from the same input stream from multiple locations simultaneously"
-		);
-	}
-}
-
 class InputStream<T> implements AsyncIterator<T, void, void>, AsyncIterable<T> {
 	private readonly channel: Channel<T>;
-	private readonly queue: T[];
-	private locked = false;
 
 	constructor(channel: Channel<T>) {
 		this.channel = channel;
-		this.queue = [];
-
-		this.listen();
 	}
 
 	public get isOpen(): boolean {
@@ -65,27 +52,32 @@ class InputStream<T> implements AsyncIterator<T, void, void>, AsyncIterable<T> {
 	}
 
 	public async next(): Promise<IteratorResult<T, void>> {
-		const valueFromQueue = this.queue.shift();
-		if (valueFromQueue) return { done: false, value: valueFromQueue };
+		return await this.channel.next();
+	}
 
-		if (this.locked) throw new InputStreamLockedError();
-		this.locked = true;
+	public async *map<O>(
+		fn: (input: T) => O | Promise<O>
+	): AsyncGenerator<O, void, void> {
+		while (true) {
+			const res = await this.next();
+			if (res.done) return;
+			yield await fn(res.value);
+		}
+	}
 
-		const res = await this.channel.next();
-
-		this.locked = false;
-		return res;
+	public async *filter(
+		fn: (input: T) => boolean
+	): AsyncGenerator<T, void, void> {
+		while (true) {
+			const res = await this.next();
+			if (res.done) return;
+			if (!fn(res.value)) continue;
+			yield res.value;
+		}
 	}
 
 	public [Symbol.asyncIterator](): AsyncIterator<T, void, void> {
-		return this;
-	}
-
-	private async listen(): Promise<void> {
-		for await (const evt of this.channel) {
-			if (this.locked) continue;
-			this.queue.push(evt);
-		}
+		return this.channel;
 	}
 }
 
