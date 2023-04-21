@@ -39,11 +39,15 @@ class HostSessionAuth {
 	}
 
 	public async checkAuth(connection: Connection): Promise<AuthResult> {
-		authLogger.info(`Authenticating connection from ${connection.remoteId}...`);
+		authLogger.info(
+			`Authenticating connection from ${connection.remoteId}...`
+		);
 
 		const res = await connection.expectIncoming(RESPONSE_TIMEOUT);
 		if (!res) {
-			authLogger.error(`Authentication of ${connection.remoteId} timed out`);
+			authLogger.error(
+				`Authentication of ${connection.remoteId} timed out`
+			);
 			return { success: false };
 		}
 
@@ -68,7 +72,7 @@ class HostSessionAuth {
 			return { success: false };
 		}
 
-		await connection.outgoing.send({ type: PacketType.AUTH_ACK });
+		await connection.send({ type: PacketType.AUTH_ACK });
 		authLogger.info(
 			`Connection from ${connection.remoteId} successfully authenticated`
 		);
@@ -90,7 +94,7 @@ class ClientSessionAuth {
 			`Attempting to authenticate to host ${connection.remoteId}...`
 		);
 
-		await connection.outgoing.send({
+		await connection.send({
 			type: PacketType.AUTH_TOKEN,
 			token: this.accessToken,
 			username: this.username

@@ -3,60 +3,35 @@ import {
 	ClientSession,
 	HostSession,
 	Session,
-	SessionCloseReason,
-	SessionEventType
+	SessionCloseReason
 } from "./session";
 import backgroundLogger from "./logger";
 import { describeSessionCloseReason } from "../common/enum_descriptions";
-import {
-	EventStream,
-	EventStreamController,
-	StreamEvent
-} from "../common/events";
+import { EventEmitter } from "../common/typed_events";
 
 const sessionManagerLogger = backgroundLogger.sub("sessionmanager");
 
-class ManagedSessionCloseEvent implements StreamEvent<SessionEventType.CLOSED> {
-	public readonly type = SessionEventType.CLOSED;
-	public readonly tabId: number;
-	public readonly reason: SessionCloseReason;
-
-	constructor(tabId: number, reason: SessionCloseReason) {
-		this.tabId = tabId;
-		this.reason = reason;
-	}
+interface ManagedSessionCloseEvent {
+	tabId: number;
+	reason: SessionCloseReason;
 }
 
-class ManagedSessionStatusUpdateEvent
-	implements StreamEvent<SessionEventType.STATUS_UPDATE>
-{
-	public readonly type = SessionEventType.STATUS_UPDATE;
-	public readonly tabId: number;
-	public readonly status: SessionStatus;
-
-	constructor(tabId: number, status: SessionStatus) {
-		this.tabId = tabId;
-		this.status = status;
-	}
+interface ManagedSessionStatusUpdateEvent {
+	tabId: number;
+	status: SessionStatus;
 }
 
-type SessionManagerEvent =
-	| ManagedSessionCloseEvent
-	| ManagedSessionStatusUpdateEvent;
+interface SessionManagerEventMap {
+	close: ManagedSessionCloseEvent;
+	statusupdate: ManagedSessionStatusUpdateEvent;
+}
 
-class SessionManager {
-	public readonly events: EventStream<SessionEventType, SessionManagerEvent>;
-
+class SessionManager extends EventEmitter<SessionManagerEventMap> {
 	private readonly tabIdSessionMap: Map<number, Session>;
-	private readonly eventsController: EventStreamController<
-		SessionEventType,
-		SessionManagerEvent
-	>;
 
 	constructor() {
+		super();
 		this.tabIdSessionMap = new Map();
-		this.eventsController = new EventStreamController();
-		this.events = this.eventsController.createStream();
 	}
 
 	public async openClientSession(
@@ -99,11 +74,9 @@ class SessionManager {
 		this.closeSession(tabId, SessionCloseReason.SUPERSEDED);
 		this.tabIdSessionMap.set(tabId, session);
 
-		session.events.on(SessionEventType.CLOSED, (evt) => {
+		session.on("close", (evt) => {
 			this.tabIdSessionMap.delete(tabId);
-			this.eventsController.emit(
-				new ManagedSessionCloseEvent(tabId, evt.reason)
-			);
+			this.emit("close", { tabId, reason: evt.reason });
 			sessionManagerLogger.info(
 				`Closed session on tab ${tabId}: ${describeSessionCloseReason(
 					evt.reason
@@ -111,7 +84,7 @@ class SessionManager {
 			);
 		});
 
-		session.events.on(SessionEventType.STATUS_UPDATE, (evt) => {
+		session.on("statusupdate", (evt) => {
 			sessionManagerLogger.debug(
 				`Status update for session on tab ${tabId}: ${JSON.stringify(
 					evt.status
@@ -124,9 +97,7 @@ class SessionManager {
 	}
 
 	private broadcastSessionStatus(tabId: number, status: SessionStatus): void {
-		this.eventsController.emit(
-			new ManagedSessionStatusUpdateEvent(tabId, status)
-		);
+		this.emit("statusupdate", { tabId, status });
 	}
 }
 

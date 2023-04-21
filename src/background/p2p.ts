@@ -2,17 +2,7 @@ import * as peerjs from "peerjs";
 import ty, { ValidatedBy, checkType } from "lifeboat";
 import { promiseWithTimeout } from "../common/utils";
 import backgroundLogger from "./logger";
-import {
-	InputStream,
-	InputStreamController,
-	OutputStream,
-	OutputStreamController
-} from "../common/streams";
-import {
-	EventStream,
-	EventStreamController,
-	StreamEvent
-} from "../common/events";
+import { EventEmitter } from "../common/typed_events";
 
 const p2pLogger = backgroundLogger.sub("p2p");
 
@@ -87,7 +77,9 @@ class Peer {
 
 	private handleConnection(connection: peerjs.DataConnection): void {
 		const timeout = setTimeout(() => {
-			p2pLogger.error(`Connection with ${connection.peer} was never opened!`);
+			p2pLogger.error(
+				`Connection with ${connection.peer} was never opened!`
+			);
 			connection.close();
 		}, OPEN_TIMEOUT);
 		connection.addListener("open", () => {
@@ -95,9 +87,7 @@ class Peer {
 			p2pLogger.debug(`Connection with ${connection.peer} opened`);
 			const conn = new Connection(connection);
 			this.connections.add(conn);
-			conn.events.on(ConnectionEventType.CLOSED, () =>
-				this.connections.delete(conn)
-			);
+			conn.on("close", () => this.connections.delete(conn));
 			this.handler(conn);
 		});
 	}
@@ -110,52 +100,45 @@ class Peer {
 			}, OPEN_TIMEOUT);
 			this.peer.on("open", () => {
 				clearTimeout(timeout);
-				p2pLogger.debug(`Peer successfully opened on id ${this.peer.id}`);
+				p2pLogger.debug(
+					`Peer successfully opened on id ${this.peer.id}`
+				);
 				res(undefined);
 			});
 		});
 	}
 }
 
-const enum ConnectionEventType {
-	CLOSED
+interface ConnectionEventMap {
+	close: void;
 }
 
-class ConnectionCloseEvent implements StreamEvent<ConnectionEventType.CLOSED> {
-	public readonly type = ConnectionEventType.CLOSED;
-}
+type Resolver<T> = (val: T | null) => void;
 
-type ConnectionEvent = ConnectionCloseEvent;
-
-class Connection {
-	public readonly incoming: InputStream<Packet>;
-	public readonly outgoing: OutputStream<Packet>;
-	public readonly events: EventStream<ConnectionEventType, ConnectionEvent>;
+class Connection extends EventEmitter<ConnectionEventMap> {
+	// public readonly events: EventStream<ConnectionEventType, ConnectionEvent>;
 
 	private readonly connection: peerjs.DataConnection;
-	private readonly incomingStreamController: InputStreamController<Packet>;
-	private readonly outgoingStreamController: OutputStreamController<Packet>;
-	private readonly eventStreamController: EventStreamController<
-		ConnectionEventType,
-		ConnectionEvent
-	>;
+	private readonly packetResolvers: [
+		res: Resolver<Packet | null>,
+		rej: Resolver<Error>
+	][];
+	// private readonly eventStreamController: EventStreamController<
+	// 	ConnectionEventType,
+	// 	ConnectionEvent
+	// >;
 
 	constructor(connection: peerjs.DataConnection) {
+		super();
 		this.connection = connection;
 		this.connection.on("data", (data) => this.onData(data));
 		this.connection.on("close", () => this.onClose());
 		this.connection.on("error", (err) => this.onError(err));
 
-		this.incomingStreamController = new InputStreamController();
-		this.incoming = this.incomingStreamController.createStream();
+		this.packetResolvers = [];
 
-		this.outgoingStreamController = new OutputStreamController((packet) =>
-			this.sendData(packet)
-		);
-		this.outgoing = this.outgoingStreamController.createStream();
-
-		this.eventStreamController = new EventStreamController();
-		this.events = this.eventStreamController.createStream();
+		// this.eventStreamController = new EventStreamController();
+		// this.events = this.eventStreamController.createStream();
 	}
 
 	public get remoteId(): string {
@@ -163,21 +146,54 @@ class Connection {
 	}
 
 	public async expectIncoming(timeout: number): Promise<Packet | null> {
-		const res = await promiseWithTimeout(this.incoming.next(), null, timeout);
-		return res?.value ?? null;
+		return await promiseWithTimeout(this.nextPacket(), null, timeout);
+	}
+
+	public async *listen(): AsyncGenerator<Packet, void, void> {
+		const packet = await this.nextPacket();
+		if (!packet) return;
+		yield packet;
+	}
+
+	public nextPacket(): Promise<Packet | null> {
+		return new Promise((res, rej) => {
+			this.addResolver(res, rej);
+		});
+	}
+
+	public send(data: Packet): void {
+		this.connection.send(data);
 	}
 
 	public close(): void {
 		this.connection.close();
 	}
 
-	private sendData(data: unknown): void {
-		this.connection.send(data);
+	private addResolver(
+		res: Resolver<Packet | null>,
+		rej: Resolver<Error>
+	): void {
+		if (!this.connection.open) res(null);
+		else this.packetResolvers.push([res, rej]);
+	}
+
+	private handlePacket(packet: Packet | null): void {
+		let resolvers;
+		while ((resolvers = this.packetResolvers.pop())) resolvers[0](packet);
+	}
+
+	private handleError(error: Error): void {
+		let resolvers;
+		while ((resolvers = this.packetResolvers.pop())) resolvers[1](error);
+	}
+
+	private closeResolvers(): void {
+		this.handlePacket(null);
 	}
 
 	private onData(data: unknown): void {
 		if (checkType(packetSchema, data)) {
-			this.incomingStreamController.send(data);
+			this.handlePacket(data);
 		} else {
 			p2pLogger.error(
 				`Received malformed data from remote peer: ${packetSchema.reason}. Terminating connection.`
@@ -189,24 +205,18 @@ class Connection {
 	private onClose(): void {
 		p2pLogger.debug(`Connection with ${this.remoteId} closed`);
 
-		this.incomingStreamController.close();
-		this.outgoingStreamController.close();
-		this.eventStreamController.emit(new ConnectionCloseEvent());
+		this.closeResolvers();
+		this.emit("close", undefined);
 	}
 
 	private onError(err: Error): void {
 		p2pLogger.error(
 			`Error in connection with ${this.remoteId}: ${err.message} (${err.name})`
 		);
+		this.handleError(err);
 		this.close();
 	}
 }
 
-export {
-	Connection,
-	ConnectionEventType,
-	ConnectionCloseEvent,
-	Peer,
-	ConnectionHandler
-};
+export { Connection, Peer, ConnectionHandler };
 console.error;

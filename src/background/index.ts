@@ -7,15 +7,14 @@ import {
 	SessionClosedMessage
 } from "../common/messages";
 import SessionManager from "./session_manager";
-import { SessionEventType } from "./session";
 
 const sessionManager = new SessionManager();
 
-sessionManager.events.on(SessionEventType.STATUS_UPDATE, (evt) => {
+sessionManager.on("statusupdate", (evt) => {
 	sendSessionStatusUpdate(evt.tabId, evt.status);
 });
 
-sessionManager.events.on(SessionEventType.CLOSED, (evt) => {
+sessionManager.on("close", (evt) => {
 	sendSessionClosed(evt.tabId, evt.reason);
 });
 
