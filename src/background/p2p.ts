@@ -219,4 +219,3 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 }
 
 export { Connection, Peer, ConnectionHandler };
-console.error;
