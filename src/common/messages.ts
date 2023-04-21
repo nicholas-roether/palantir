@@ -6,7 +6,8 @@ const enum MessageType {
 	CLOSE_SESSION,
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
-	SESSION_CLOSED
+	SESSION_CLOSED,
+	VIDEO_SYNC
 }
 
 class FindVideosMessage {
@@ -130,6 +131,25 @@ class SessionClosedMessage {
 	}
 }
 
+const enum VideoSyncAction {
+	SYNC,
+	PAUSE,
+	PLAY
+}
+
+class VideoSyncMessage {
+	public readonly type = MessageType.VIDEO_SYNC;
+	public readonly timestamp: number;
+	public readonly action: VideoSyncAction;
+	public readonly time: number;
+
+	constructor(timestamp: number, action: VideoSyncAction, time: number) {
+		this.timestamp = timestamp;
+		this.action = action;
+		this.time = time;
+	}
+}
+
 type Message =
 	| FindVideosMessage
 	| VideosFoundMessage
@@ -138,7 +158,8 @@ type Message =
 	| CloseSessionMessage
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
-	| SessionClosedMessage;
+	| SessionClosedMessage
+	| VideoSyncMessage;
 
 export {
 	MessageType,
@@ -157,5 +178,7 @@ export {
 	SessionStatus,
 	SessionStatusUpdateMessage,
 	SessionCloseReason,
-	SessionClosedMessage
+	SessionClosedMessage,
+	VideoSyncAction,
+	VideoSyncMessage
 };

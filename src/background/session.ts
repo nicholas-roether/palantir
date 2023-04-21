@@ -162,7 +162,9 @@ class ClientSession extends Session {
 				);
 				continue;
 			}
-			sessionLogger.debug(`Client session received a session status update`);
+			sessionLogger.debug(
+				`Client session received a session status update`
+			);
 			this.users = packet.users;
 		}
 	}
@@ -211,7 +213,9 @@ class HostSession extends Session {
 			return;
 		}
 		sessionLogger.info(
-			`User ${res.username} connected to host session ${await this.getId()}`
+			`User ${
+				res.username
+			} connected to host session ${await this.getId()}`
 		);
 
 		const user: ConnectedUser = { username: res.username, connection };
