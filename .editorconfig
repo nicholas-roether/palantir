@@ -4,7 +4,18 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{ts,js,json,yml}]
+[*.{ts,js,json,yml,md}]
 charset = utf-8
-indent_style = tabs
+
+[*.{ts,js,json,yml}]
+indent_style = tab
+
+[*.{ts,js}]
+indent_size = 4
+
+[*.{json,yml}]
 indent_size = 2
+
+[*.md]
+indent_style = space
+indent_size = 3
