@@ -116,17 +116,11 @@ interface ConnectionEventMap {
 type Resolver<T> = (val: T | null) => void;
 
 class Connection extends EventEmitter<ConnectionEventMap> {
-	// public readonly events: EventStream<ConnectionEventType, ConnectionEvent>;
-
 	private readonly connection: peerjs.DataConnection;
 	private readonly packetResolvers: [
 		res: Resolver<Packet | null>,
 		rej: Resolver<Error>
 	][];
-	// private readonly eventStreamController: EventStreamController<
-	// 	ConnectionEventType,
-	// 	ConnectionEvent
-	// >;
 
 	constructor(connection: peerjs.DataConnection) {
 		super();
@@ -136,9 +130,6 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 		this.connection.on("error", (err) => this.onError(err));
 
 		this.packetResolvers = [];
-
-		// this.eventStreamController = new EventStreamController();
-		// this.events = this.eventStreamController.createStream();
 	}
 
 	public get remoteId(): string {
