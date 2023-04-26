@@ -3,6 +3,7 @@ import { VideoSyncAction, VideoSyncMessage } from "../common/messages";
 import PacketType from "./packets";
 import { EventEmitter } from "../common/typed_events";
 import { Connection } from "./p2p";
+import { IdentifierMap } from "../common/data_structures";
 
 const videoSyncPacketSchema = ty.object({
 	type: ty.equals(PacketType.VIDEO_SYNC as const),
@@ -113,14 +114,18 @@ class VideoSyncClient extends EventEmitter<{ message: VideoSyncMessageEvent }> {
 }
 
 class VideoSyncServer {
-	private readonly connections: Set<VideoSyncAdapter>;
+	private readonly connections: IdentifierMap<VideoSyncAdapter>;
 
 	constructor() {
-		this.connections = new Set();
+		this.connections = new IdentifierMap();
 	}
 
-	public addRemote(connection: Connection): void {
+	public addRemote(connection: Connection): number {
 		return this.addConnection(new RemoteVideoSyncAdapter(connection));
+	}
+
+	public removeRemote(identifier: number): void {
+		this.connections.remove(identifier);
 	}
 
 	public createLocalClient(): VideoSyncClient {
@@ -129,18 +134,18 @@ class VideoSyncServer {
 		return new VideoSyncClient(adp2);
 	}
 
-	private addConnection(connection: VideoSyncAdapter): void {
-		this.connections.add(connection);
-		this.listenOn(connection);
+	private addConnection(connection: VideoSyncAdapter): number {
+		const identifier = this.connections.add(connection);
+		this.listenOn(identifier, connection);
+		return identifier;
 	}
 
-	private removeConnection(connection: VideoSyncAdapter): void {
-		this.connections.delete(connection);
-	}
-
-	private async listenOn(connection: VideoSyncAdapter): Promise<void> {
+	private async listenOn(
+		identifier: number,
+		connection: VideoSyncAdapter
+	): Promise<void> {
 		for await (const packet of connection.listen()) {
-			if (!this.connections.has(connection)) break;
+			if (!this.connections.has(identifier)) break;
 			for (const conn of this.connections) {
 				if (conn == connection) continue;
 				conn.send(packet);

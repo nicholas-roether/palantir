@@ -1,4 +1,4 @@
-import { IdentifierMap } from "./utils";
+import { IdentifierMap } from "./data_structures";
 
 type EventHandler<E> = (event: E) => unknown;
 
