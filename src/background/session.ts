@@ -5,13 +5,15 @@ import {
 	SessionStatus,
 	SessionType,
 	User,
-	UserRole
+	UserRole,
+	VideoSyncMessage
 } from "../common/messages";
 import { ClientSessionAuth, HostSessionAuth } from "./auth";
 import { Connection, Peer } from "./p2p";
 import PacketType from "./packets";
 import backgroundLogger from "./logger";
 import { EventEmitter } from "../common/typed_events";
+import { VideoSyncClient, VideoSyncServer } from "./video_sync";
 
 const sessionLogger = backgroundLogger.sub("session");
 
@@ -24,11 +26,6 @@ const sessionUpdatePacketSchema = ty.object({
 	)
 });
 
-const enum SessionEventType {
-	CLOSED,
-	STATUS_UPDATE
-}
-
 interface SessionCloseEvent {
 	reason: SessionCloseReason;
 }
@@ -37,9 +34,14 @@ interface SessionStatusUpdateEvent {
 	status: SessionStatus;
 }
 
+interface SessionVideoSyncEvent {
+	message: VideoSyncMessage
+}
+
 interface SessionEventMap {
 	close: SessionCloseEvent;
 	statusupdate: SessionStatusUpdateEvent;
+	videosync: SessionVideoSyncEvent;
 }
 
 abstract class Session extends EventEmitter<SessionEventMap> {
@@ -57,10 +59,12 @@ abstract class Session extends EventEmitter<SessionEventMap> {
 
 	public abstract getStatus(): Promise<SessionStatus>;
 
+	public abstract sync(message: VideoSyncMessage): void;
+
 	protected abstract handleConnection(connection: Connection): Promise<void>;
 
 	protected async broadcastStatusUpdate(): Promise<void> {
-		this.emit("statusupdate", { status: await this.getStatus() });
+		this.emit("statusupdate", { status: await this.getStatus()});
 	}
 }
 
@@ -72,6 +76,7 @@ class ClientSession extends Session {
 	private readonly auth: ClientSessionAuth;
 	private connectionState = ConnectionState.CONNECTING;
 	private users: User[];
+	private syncClient: VideoSyncClient | null = null;
 
 	constructor(username: string, hostId: string, accessToken: string) {
 		super();
@@ -98,6 +103,10 @@ class ClientSession extends Session {
 		};
 	}
 
+	public sync(message: VideoSyncMessage): void {
+		this.syncClient?.send(message);
+	}
+
 	protected async handleConnection(connection: Connection): Promise<void> {
 		if (this.connectionState != ConnectionState.CONNECTING) {
 			sessionLogger.warn(
@@ -118,7 +127,11 @@ class ClientSession extends Session {
 			this.close(SessionCloseReason.DISCONNECTED)
 		);
 
-		await this.listen(connection);
+		this.syncClient = VideoSyncClient.remote(connection);
+		this.syncClient.on("message", evt => this.emit("videosync", evt))
+
+		await Promise.all([this.listen(connection), this.syncClient.listen()]);
+		this.close(SessionCloseReason.DISCONNECTED);
 	}
 
 	public close(reason: SessionCloseReason): void {
@@ -157,12 +170,17 @@ class HostSession extends Session {
 	public readonly username: string;
 	private readonly auth: HostSessionAuth;
 	private readonly connectedUsers: Set<ConnectedUser>;
+	private readonly syncServer: VideoSyncServer;
+	private readonly syncClient: VideoSyncClient;
 
 	constructor(username: string) {
 		super();
 		this.auth = new HostSessionAuth();
 		this.username = username;
 		this.connectedUsers = new Set();
+		this.syncServer = new VideoSyncServer();
+		this.syncClient = this.syncServer.createLocalClient();
+		this.syncClient.on("message", (evt) => this.emit("videosync", evt))
 		this.peer.listen();
 	}
 
@@ -184,6 +202,10 @@ class HostSession extends Session {
 		};
 	}
 
+	public sync(message: VideoSyncMessage): void {
+		this.syncClient.send(message);
+	}
+
 	protected async handleConnection(connection: Connection): Promise<void> {
 		const res = await this.auth.checkAuth(connection);
 		if (!res.success) {
@@ -201,8 +223,11 @@ class HostSession extends Session {
 		await this.broadcastStatusUpdate();
 		await this.sendSessionUpdatePackets();
 
+		const syncConnId = this.syncServer.addRemote(connection);
+
 		connection.on("close", async () => {
 			this.connectedUsers.delete(user);
+			this.syncServer.removeRemote(syncConnId);
 			await this.broadcastStatusUpdate();
 			await this.sendSessionUpdatePackets();
 
@@ -240,7 +265,7 @@ export {
 	ClientSession,
 	HostSession,
 	SessionCloseReason,
-	SessionEventType,
 	SessionCloseEvent,
-	SessionStatusUpdateEvent
+	SessionStatusUpdateEvent,
+	SessionVideoSyncEvent
 };

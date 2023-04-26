@@ -86,7 +86,6 @@ class VideoSyncClient extends EventEmitter<{ message: VideoSyncMessageEvent }> {
 	constructor(backend: VideoSyncAdapter) {
 		super();
 		this.backend = backend;
-		this.listen();
 	}
 
 	public static remote(connection: Connection): VideoSyncClient {
@@ -103,7 +102,7 @@ class VideoSyncClient extends EventEmitter<{ message: VideoSyncMessageEvent }> {
 		});
 	}
 
-	private async listen(): Promise<void> {
+	public async listen(): Promise<void> {
 		for await (const packet of this.backend.listen()) this.onPacket(packet);
 	}
 
