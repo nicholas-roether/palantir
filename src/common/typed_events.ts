@@ -1,31 +1,28 @@
+import { IdentifierMap } from "./utils";
+
 type EventHandler<E> = (event: E) => unknown;
 
 abstract class EventEmitter<M> {
 	private readonly target: EventTarget;
-	private readonly identifierMap: Map<
-		number,
-		[type: string, listener: EventHandler<Event>]
+	private readonly listeners: IdentifierMap<
+		[type: string, handler: EventHandler<Event>]
 	>;
-	private nextIdentifier: number;
 
 	constructor() {
 		this.target = new EventTarget();
-		this.identifierMap = new Map();
-		this.nextIdentifier = 0;
+		this.listeners = new IdentifierMap();
 	}
 
 	public on<T extends keyof M & string>(
 		type: T,
 		handler: EventHandler<M[T]>
 	): number {
-		const identifier = this.makeIdentifier();
 		const listener = (evt: Event): void => {
 			if (!("detail" in evt)) return;
 			handler(evt.detail as M[T]);
 		};
 		this.target.addEventListener(type, listener);
-		this.identifierMap.set(identifier, [type, listener]);
-		return identifier;
+		return this.listeners.add([type, listener]);
 	}
 
 	public emit<T extends keyof M & string>(type: T, event: M[T]): void {
@@ -33,15 +30,10 @@ abstract class EventEmitter<M> {
 	}
 
 	public removeListener(identifier: number): void {
-		const entry = this.identifierMap.get(identifier);
+		const entry = this.listeners.take(identifier);
 		if (!entry) return;
 		const [type, listener] = entry;
-		this.identifierMap.delete(identifier);
 		this.target.removeEventListener(type, listener);
-	}
-
-	private makeIdentifier(): number {
-		return this.nextIdentifier++;
 	}
 }
 
