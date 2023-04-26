@@ -35,7 +35,7 @@ interface SessionStatusUpdateEvent {
 }
 
 interface SessionVideoSyncEvent {
-	message: VideoSyncMessage
+	message: VideoSyncMessage;
 }
 
 interface SessionEventMap {
@@ -64,7 +64,7 @@ abstract class Session extends EventEmitter<SessionEventMap> {
 	protected abstract handleConnection(connection: Connection): Promise<void>;
 
 	protected async broadcastStatusUpdate(): Promise<void> {
-		this.emit("statusupdate", { status: await this.getStatus()});
+		this.emit("statusupdate", { status: await this.getStatus() });
 	}
 }
 
@@ -128,7 +128,7 @@ class ClientSession extends Session {
 		);
 
 		this.syncClient = VideoSyncClient.remote(connection);
-		this.syncClient.on("message", evt => this.emit("videosync", evt))
+		this.syncClient.on("message", (evt) => this.emit("videosync", evt));
 
 		await Promise.all([this.listen(connection), this.syncClient.listen()]);
 		this.close(SessionCloseReason.DISCONNECTED);
@@ -180,7 +180,7 @@ class HostSession extends Session {
 		this.connectedUsers = new Set();
 		this.syncServer = new VideoSyncServer();
 		this.syncClient = this.syncServer.createLocalClient();
-		this.syncClient.on("message", (evt) => this.emit("videosync", evt))
+		this.syncClient.on("message", (evt) => this.emit("videosync", evt));
 		this.peer.listen();
 	}
 
