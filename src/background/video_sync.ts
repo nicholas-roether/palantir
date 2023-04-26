@@ -89,6 +89,11 @@ class VideoSyncClient extends EventEmitter<{ message: VideoSyncMessageEvent }> {
 		this.listen();
 	}
 
+	public static remote(connection: Connection): VideoSyncClient {
+		const adapter = new RemoteVideoSyncAdapter(connection);
+		return new VideoSyncClient(adapter);
+	}
+
 	public async send(message: VideoSyncMessage): Promise<void> {
 		await this.backend.send({
 			type: PacketType.VIDEO_SYNC,
