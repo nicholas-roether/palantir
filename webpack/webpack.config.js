@@ -18,7 +18,7 @@ module.exports = (env) => ({
 		path: path.join(wd, "dist")
 	},
 	resolve: {
-		extensions: [".ts", ".js", ".tsx", ".jsx"]
+		extensions: [".ts", ".js", ".tsx", ".jsx", ".glsl"]
 	},
 	module: {
 		rules: [
@@ -34,6 +34,10 @@ module.exports = (env) => ({
 					]
 				},
 			},
+			{
+				test: /\.glsl$/,
+				type: "asset/source"
+			}
 		]
 	},
 	plugins: [
