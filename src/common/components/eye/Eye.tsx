@@ -1,4 +1,5 @@
 import { JSX, onCleanup, onMount } from "solid-js";
+import { makeNoise4D } from "fast-simplex-noise";
 
 import fragShaderSource from "./glsl/eye.frag.glsl";
 import vertShaderSource from "./glsl/eye.vert.glsl";
@@ -25,6 +26,65 @@ function Eye({ size }: EyeProps): JSX.Element {
 	return <canvas width={size} height={size} ref={cvs} />;
 }
 
+class NoiseTexture {
+	private readonly buffer: Float32Array;
+	private readonly getNoise: (
+		x: number,
+		y: number,
+		z: number,
+		t: number
+	) => number;
+	public readonly width: number;
+	public readonly height: number;
+	public readonly depth: number;
+	private readonly scale: number;
+	private readonly speed: number;
+	private time = 0;
+
+	constructor(
+		width: number,
+		height: number,
+		depth: number,
+		scale: number,
+		speed: number
+	) {
+		this.buffer = new Float32Array(width * height * depth);
+		this.width = width;
+		this.height = height;
+		this.depth = depth;
+		this.scale = scale;
+		this.speed = speed;
+		this.getNoise = makeNoise4D();
+		this.fillBuffer();
+	}
+
+	public update(dt: number): void {
+		this.time += dt;
+		this.fillBuffer();
+	}
+
+	public get data(): ArrayBufferView {
+		return this.buffer;
+	}
+
+	private fillBuffer(): void {
+		let index = 0;
+		for (let z = 0; z < this.depth; z++) {
+			for (let y = 0; y < this.height; y++) {
+				for (let x = 0; x < this.width; x++) {
+					this.buffer[index] = this.getNoise(
+						x * this.scale,
+						y * this.scale,
+						z * this.scale,
+						this.time * this.speed
+					);
+					index++;
+				}
+			}
+		}
+	}
+}
+
 class EyeRenderer {
 	private static readonly FOV = (1 / 3) * Math.PI;
 	private static readonly VERTICES = [
@@ -33,8 +93,13 @@ class EyeRenderer {
 	private static readonly VERTEX_SIZE = 2;
 	private static readonly NUM_VERTICES =
 		this.VERTICES.length / this.VERTEX_SIZE;
+	private static readonly NOISE_SCALE = 0.02;
+	private static readonly NOISE_SPEED = 0.0004;
+	private static readonly NOISE_SIZE = 50.0;
 
 	private readonly gl: WebGL2RenderingContext;
+
+	private readonly noiseTexture: NoiseTexture;
 	private running = false;
 	private lastFrameTime?: number;
 
@@ -44,6 +109,13 @@ class EyeRenderer {
 			throw new Error("WebGL2 is not supported by your browser!");
 		}
 		this.gl = webgl;
+		this.noiseTexture = new NoiseTexture(
+			EyeRenderer.NOISE_SIZE,
+			EyeRenderer.NOISE_SIZE,
+			EyeRenderer.NOISE_SIZE,
+			EyeRenderer.NOISE_SCALE,
+			EyeRenderer.NOISE_SPEED
+		);
 	}
 
 	public start(): void {
@@ -52,13 +124,14 @@ class EyeRenderer {
 		this.gl.clearDepth(1.0);
 		this.gl.enable(this.gl.DEPTH_TEST);
 		this.gl.depthFunc(this.gl.LEQUAL);
+		this.gl.enable(this.gl.BLEND);
+		this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 		this.gl.viewport(
 			0,
 			0,
 			this.gl.drawingBufferWidth,
 			this.gl.drawingBufferHeight
 		);
-		console.log(this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
 
 		const shaderProgram = this.makeProgram(
 			this.makeShader(this.gl.VERTEX_SHADER, vertShaderSource),
@@ -77,6 +150,7 @@ class EyeRenderer {
 			new Float32Array(EyeRenderer.VERTICES),
 			this.gl.STATIC_DRAW
 		);
+		Float32Array;
 		this.gl.vertexAttribPointer(
 			0,
 			EyeRenderer.VERTEX_SIZE,
@@ -93,6 +167,42 @@ class EyeRenderer {
 			this.gl.drawingBufferWidth / this.gl.drawingBufferHeight
 		);
 		this.setUniformFloat(shaderProgram, "field_of_view", EyeRenderer.FOV);
+
+		const tex = this.gl.createTexture();
+		this.gl.bindTexture(this.gl.TEXTURE_3D, tex);
+		this.gl.texParameteri(
+			this.gl.TEXTURE_3D,
+			this.gl.TEXTURE_MIN_FILTER,
+			this.gl.NEAREST
+		);
+		this.gl.texParameteri(
+			this.gl.TEXTURE_3D,
+			this.gl.TEXTURE_MAG_FILTER,
+			this.gl.NEAREST
+		);
+		this.gl.texParameteri(
+			this.gl.TEXTURE_3D,
+			this.gl.TEXTURE_WRAP_S,
+			this.gl.MIRRORED_REPEAT
+		);
+		this.gl.texParameteri(
+			this.gl.TEXTURE_3D,
+			this.gl.TEXTURE_WRAP_T,
+			this.gl.MIRRORED_REPEAT
+		);
+		this.gl.texParameteri(
+			this.gl.TEXTURE_3D,
+			this.gl.TEXTURE_WRAP_R,
+			this.gl.MIRRORED_REPEAT
+		);
+		this.gl.texStorage3D(
+			this.gl.TEXTURE_3D,
+			1,
+			this.gl.R32F,
+			this.noiseTexture.width,
+			this.noiseTexture.height,
+			this.noiseTexture.depth
+		);
 
 		this.run();
 	}
@@ -122,10 +232,24 @@ class EyeRenderer {
 	}
 
 	private update(dt: number): void {
-		// TODO do something here
+		this.noiseTexture.update(dt);
 	}
 
 	private render(): void {
+		this.gl.texSubImage3D(
+			this.gl.TEXTURE_3D,
+			0,
+			0,
+			0,
+			0,
+			this.noiseTexture.width,
+			this.noiseTexture.height,
+			this.noiseTexture.depth,
+			this.gl.RED,
+			this.gl.FLOAT,
+			this.noiseTexture.data
+		);
+
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 		this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, EyeRenderer.NUM_VERTICES);
 	}

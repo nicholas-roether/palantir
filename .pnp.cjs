@@ -41,6 +41,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["copy-webpack-plugin", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:11.0.0"],\
             ["eslint", "npm:8.38.0"],\
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
+            ["fast-simplex-noise", "npm:4.0.0"],\
             ["lifeboat", "npm:1.3.3"],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
@@ -4018,6 +4019,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["fast-simplex-noise", [\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/fast-simplex-noise-npm-4.0.0-88bb9687c3-fc6caa2957.zip/node_modules/fast-simplex-noise/",\
+          "packageDependencies": [\
+            ["fast-simplex-noise", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["fastest-levenshtein", [\
         ["npm:1.0.16", {\
           "packageLocation": "./.yarn/cache/fastest-levenshtein-npm-1.0.16-192d328856-a78d44285c.zip/node_modules/fastest-levenshtein/",\
@@ -4842,6 +4852,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["copy-webpack-plugin", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:11.0.0"],\
             ["eslint", "npm:8.38.0"],\
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
+            ["fast-simplex-noise", "npm:4.0.0"],\
             ["lifeboat", "npm:1.3.3"],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
