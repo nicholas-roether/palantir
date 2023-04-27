@@ -13,6 +13,7 @@ import {
 	SessionStatus,
 	SessionCloseReason
 } from "../common/messages";
+import Eye from "../common/components/eye/Eye";
 
 async function getCurrentTab(): Promise<number> {
 	const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -108,6 +109,7 @@ function Popup(): JSX.Element {
 
 	return (
 		<PopupContainer>
+			<Eye size={200} />
 			<Switch>
 				<Match when={session() == null}>
 					<h3>No active session</h3>
