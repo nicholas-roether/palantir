@@ -43,6 +43,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
             ["fast-simplex-noise", "npm:4.0.0"],\
             ["lifeboat", "npm:1.3.3"],\
+            ["palantir-wasm", "portal:./wasm/pkg::locator=palantir%40workspace%3A."],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
             ["simlo", "npm:1.0.0"],\
@@ -4854,6 +4855,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-prettier", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:8.8.0"],\
             ["fast-simplex-noise", "npm:4.0.0"],\
             ["lifeboat", "npm:1.3.3"],\
+            ["palantir-wasm", "portal:./wasm/pkg::locator=palantir%40workspace%3A."],\
             ["peerjs", "npm:1.4.7"],\
             ["prettier", "npm:2.8.7"],\
             ["simlo", "npm:1.0.0"],\
@@ -4865,6 +4867,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["webextension-polyfill", "npm:0.10.0"],\
             ["webpack", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:5.78.0"],\
             ["webpack-cli", "virtual:ce2b5f587321352e5d0459f4e55666e49220dd46db426cc1b6668a157029f531f1a4aed4852c4e1de5e4f3b63e587d05205a38f19bdef31f442f2eceaa56b0b7#npm:5.0.1"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["palantir-wasm", [\
+        ["portal:./wasm/pkg::locator=palantir%40workspace%3A.", {\
+          "packageLocation": "./wasm/pkg/",\
+          "packageDependencies": [\
+            ["palantir-wasm", "portal:./wasm/pkg::locator=palantir%40workspace%3A."]\
           ],\
           "linkType": "SOFT"\
         }]\
