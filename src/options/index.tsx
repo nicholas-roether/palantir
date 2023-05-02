@@ -1,9 +1,8 @@
 import { JSX } from "solid-js";
 import { render } from "solid-js/web";
-import Eye from "../common/components/eye/Eye";
 
 function Options(): JSX.Element {
-	return <Eye size={400} />;
+	return <></>;
 }
 
 const content = document.getElementById("content");
