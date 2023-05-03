@@ -7,7 +7,10 @@ const enum MessageType {
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
-	VIDEO_SYNC
+	VIDEO_SYNC,
+	START_VIDEO_SYNC,
+	STOP_VIDEO_SYNC,
+	REDIRECT
 }
 
 class FindVideosMessage {
@@ -150,6 +153,30 @@ class VideoSyncMessage {
 	}
 }
 
+class StartVideoSyncMessage {
+	public readonly type = MessageType.START_VIDEO_SYNC;
+	public readonly query: string;
+	public readonly heartbeat: boolean;
+
+	constructor(query: string, heartbeat: boolean) {
+		this.query = query;
+		this.heartbeat = heartbeat;
+	}
+}
+
+class StopVideoSyncMessage {
+	public readonly type = MessageType.STOP_VIDEO_SYNC;
+}
+
+class RedirectMessage {
+	public readonly type = MessageType.REDIRECT;
+	public readonly href: string;
+
+	constructor(href: string) {
+		this.href = href;
+	}
+}
+
 type Message =
 	| FindVideosMessage
 	| VideosFoundMessage
@@ -159,7 +186,10 @@ type Message =
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
-	| VideoSyncMessage;
+	| VideoSyncMessage
+	| StartVideoSyncMessage
+	| StopVideoSyncMessage
+	| RedirectMessage;
 
 export {
 	MessageType,
@@ -180,5 +210,8 @@ export {
 	SessionCloseReason,
 	SessionClosedMessage,
 	VideoSyncAction,
-	VideoSyncMessage
+	VideoSyncMessage,
+	StartVideoSyncMessage,
+	StopVideoSyncMessage,
+	RedirectMessage
 };

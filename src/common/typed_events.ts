@@ -2,7 +2,7 @@ import { IdentifierMap } from "./data_structures";
 
 type EventHandler<E> = (event: E) => unknown;
 
-abstract class EventEmitter<M> {
+class EventEmitter<M> {
 	private readonly target: EventTarget;
 	private readonly listeners: IdentifierMap<
 		[type: string, handler: EventHandler<Event>]
