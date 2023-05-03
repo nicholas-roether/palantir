@@ -23,8 +23,12 @@
             "all_frames": true,
             "js": [
                 "browser-polyfill.js",
-                "content.js"
+                "frames.js"
             ]
+        },
+        {
+            "matches": ["<all_urls>"],
+            "js": "window.js"
         }
     ],
     "background": {

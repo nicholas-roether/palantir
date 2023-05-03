@@ -14,7 +14,8 @@ module.exports = (env) => ({
 	devtool: env.production ? undefined : "source-map",
 	entry: {
 		popup: path.join(src, "popup"),
-		content: path.join(src, "content"),
+		window: path.join(src, "window"),
+		frames: path.join(src, "frames"),
 		background: path.join(src, "background"),
 		options: path.join(src, "options")
 	},
