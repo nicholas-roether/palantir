@@ -11,7 +11,8 @@ const enum MessageType {
 	START_VIDEO_SYNC,
 	STOP_VIDEO_SYNC,
 	REDIRECT,
-	PAGE_READY
+	PAGE_READY,
+	MEDIA_SYNC
 }
 
 class FindVideosMessage {
@@ -161,6 +162,23 @@ class VideoSyncMessage {
 	}
 }
 
+const enum MediaSyncAction {
+	SYNC,
+	PAUSE,
+	PLAY
+}
+
+class MediaSyncMessage {
+	public readonly type = MessageType.MEDIA_SYNC;
+	public readonly action: MediaSyncAction;
+	public readonly time: number;
+
+	constructor(action: MediaSyncAction, time: number) {
+		this.action = action;
+		this.time = time;
+	}
+}
+
 class StartVideoSyncMessage {
 	public readonly type = MessageType.START_VIDEO_SYNC;
 	public readonly query: string;
@@ -199,6 +217,7 @@ type Message =
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
 	| VideoSyncMessage
+	| MediaSyncMessage
 	| StartVideoSyncMessage
 	| StopVideoSyncMessage
 	| RedirectMessage
@@ -224,6 +243,8 @@ export {
 	SessionClosedMessage,
 	VideoSyncAction,
 	VideoSyncMessage,
+	MediaSyncAction,
+	MediaSyncMessage,
 	StartVideoSyncMessage,
 	StopVideoSyncMessage,
 	RedirectMessage,

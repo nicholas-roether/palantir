@@ -4,7 +4,10 @@ const enum PacketType {
 	SESSION_UPDATE,
 	START_VIDEO_SYNC,
 	STOP_VIDEO_SYNC,
-	VIDEO_SYNC
+	VIDEO_SYNC,
+	PLAY_MEDIA,
+	PAUSE_MEDIA,
+	SYNC_MEDIA
 }
 
 export default PacketType;
