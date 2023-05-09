@@ -1,4 +1,3 @@
-import baseLogger from "./logger";
 import { Message } from "./messages";
 import { EventEmitter } from "./typed_events";
 
