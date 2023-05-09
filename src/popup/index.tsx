@@ -23,7 +23,7 @@ async function getCurrentTab(): Promise<number> {
 
 async function createHostSession(): Promise<void> {
 	await browser.runtime.sendMessage(
-		new CreateHostSessionMessage(await getCurrentTab())
+		new CreateHostSessionMessage(await getCurrentTab(), "Test User")
 	);
 }
 
@@ -32,7 +32,12 @@ async function createClientSession(
 	accessToken: string
 ): Promise<void> {
 	await browser.runtime.sendMessage(
-		new CreateClientSessionMessage(await getCurrentTab(), hostId, accessToken)
+		new CreateClientSessionMessage(
+			await getCurrentTab(),
+			"Test User",
+			hostId,
+			accessToken
+		)
 	);
 }
 

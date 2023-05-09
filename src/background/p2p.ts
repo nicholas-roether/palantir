@@ -110,6 +110,7 @@ class Peer {
 }
 
 interface ConnectionEventMap {
+	packet: Packet;
 	close: void;
 }
 

@@ -25,7 +25,7 @@ class EventEmitter<M> {
 		return this.listeners.add([type, listener]);
 	}
 
-	public emit<T extends keyof M & string>(type: T, event: M[T]): void {
+	protected emit<T extends keyof M & string>(type: T, event: M[T]): void {
 		this.target.dispatchEvent(new CustomEvent(type, { detail: event }));
 	}
 

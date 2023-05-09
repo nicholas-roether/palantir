@@ -1,3 +1,4 @@
+import baseLogger from "./logger";
 import { Message } from "./messages";
 import { EventEmitter } from "./typed_events";
 
@@ -104,4 +105,6 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 	}
 }
 
-export { MessagePort, MessageHandler };
+const messageBus = MessagePort.bus();
+
+export { MessagePort, MessageHandler, messageBus };
