@@ -38,10 +38,18 @@ interface SessionVideoSyncEvent {
 	message: VideoSyncMessage;
 }
 
+interface SessionVideoSyncStartEvent {
+	href: string;
+	query: string;
+	heartbeat: boolean;
+}
+
 interface SessionEventMap {
 	close: SessionCloseEvent;
 	statusupdate: SessionStatusUpdateEvent;
 	videosync: SessionVideoSyncEvent;
+	videosyncstart: SessionVideoSyncStartEvent;
+	videosyncstop: void;
 }
 
 abstract class Session extends EventEmitter<SessionEventMap> {

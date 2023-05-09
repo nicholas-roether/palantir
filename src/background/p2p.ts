@@ -209,4 +209,4 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 	}
 }
 
-export { Connection, Peer, ConnectionHandler };
+export { Connection, Peer, ConnectionHandler, Packet };

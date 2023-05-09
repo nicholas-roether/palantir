@@ -10,7 +10,8 @@ const enum MessageType {
 	VIDEO_SYNC,
 	START_VIDEO_SYNC,
 	STOP_VIDEO_SYNC,
-	REDIRECT
+	REDIRECT,
+	PAGE_READY
 }
 
 class FindVideosMessage {
@@ -142,12 +143,10 @@ const enum VideoSyncAction {
 
 class VideoSyncMessage {
 	public readonly type = MessageType.VIDEO_SYNC;
-	public readonly timestamp: number;
 	public readonly action: VideoSyncAction;
 	public readonly time: number;
 
-	constructor(timestamp: number, action: VideoSyncAction, time: number) {
-		this.timestamp = timestamp;
+	constructor(action: VideoSyncAction, time: number) {
 		this.action = action;
 		this.time = time;
 	}
@@ -177,6 +176,10 @@ class RedirectMessage {
 	}
 }
 
+class PageReadyMessage {
+	public readonly type = MessageType.PAGE_READY;
+}
+
 type Message =
 	| FindVideosMessage
 	| VideosFoundMessage
@@ -189,7 +192,8 @@ type Message =
 	| VideoSyncMessage
 	| StartVideoSyncMessage
 	| StopVideoSyncMessage
-	| RedirectMessage;
+	| RedirectMessage
+	| PageReadyMessage;
 
 export {
 	MessageType,
@@ -213,5 +217,6 @@ export {
 	VideoSyncMessage,
 	StartVideoSyncMessage,
 	StopVideoSyncMessage,
-	RedirectMessage
+	RedirectMessage,
+	PageReadyMessage
 };
