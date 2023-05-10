@@ -243,12 +243,12 @@ class HostSessionHandler {
 		const user: ConnectedUser = { username: authRes.username, connection };
 		this.connectedUsers.add(user);
 		await this.postStatusUpdate();
-		await this.sendSessionUpdate();
+		this.sendSessionUpdate();
 
 		connection.on("close", async () => {
 			this.connectedUsers.delete(user);
 			await this.postStatusUpdate();
-			await this.sendSessionUpdate();
+			this.sendSessionUpdate();
 
 			log.info(
 				`User ${authRes.username} has disconnected from session on tab ${this.session.tabId}`
