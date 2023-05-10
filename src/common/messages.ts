@@ -7,9 +7,6 @@ const enum MessageType {
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
-	VIDEO_SYNC,
-	START_VIDEO_SYNC,
-	STOP_VIDEO_SYNC,
 	REDIRECT,
 	PAGE_READY,
 	MEDIA_SYNC
@@ -145,23 +142,6 @@ class SessionClosedMessage {
 	}
 }
 
-const enum VideoSyncAction {
-	SYNC,
-	PAUSE,
-	PLAY
-}
-
-class VideoSyncMessage {
-	public readonly type = MessageType.VIDEO_SYNC;
-	public readonly action: VideoSyncAction;
-	public readonly time: number;
-
-	constructor(action: VideoSyncAction, time: number) {
-		this.action = action;
-		this.time = time;
-	}
-}
-
 const enum MediaSyncAction {
 	SYNC,
 	PAUSE,
@@ -177,21 +157,6 @@ class MediaSyncMessage {
 		this.action = action;
 		this.time = time;
 	}
-}
-
-class StartVideoSyncMessage {
-	public readonly type = MessageType.START_VIDEO_SYNC;
-	public readonly query: string;
-	public readonly heartbeat: boolean;
-
-	constructor(query: string, heartbeat: boolean) {
-		this.query = query;
-		this.heartbeat = heartbeat;
-	}
-}
-
-class StopVideoSyncMessage {
-	public readonly type = MessageType.STOP_VIDEO_SYNC;
 }
 
 class RedirectMessage {
@@ -216,10 +181,7 @@ type Message =
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
-	| VideoSyncMessage
 	| MediaSyncMessage
-	| StartVideoSyncMessage
-	| StopVideoSyncMessage
 	| RedirectMessage
 	| PageReadyMessage;
 
@@ -241,12 +203,8 @@ export {
 	SessionStatusUpdateMessage,
 	SessionCloseReason,
 	SessionClosedMessage,
-	VideoSyncAction,
-	VideoSyncMessage,
 	MediaSyncAction,
 	MediaSyncMessage,
-	StartVideoSyncMessage,
-	StopVideoSyncMessage,
 	RedirectMessage,
 	PageReadyMessage
 };
