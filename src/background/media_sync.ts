@@ -109,57 +109,43 @@ class MediaController extends EventEmitter<{
 	}
 }
 
-class MediaSyncClient extends EventEmitter<{ disconnect: void }> {
-	private readonly connection: Connection;
+class MediaSyncPacketHandler extends EventEmitter<{
+	packet: Packet;
+}> {
 	private readonly controller: MediaController;
 
-	private listening = false;
-
-	constructor(connection: Connection, controller: MediaController) {
+	constructor(controller: MediaController) {
 		super();
 
-		this.connection = connection;
 		this.controller = controller;
-	}
-
-	public async listen(): Promise<void> {
-		this.listening = true;
-
-		this.controller.on("disconnect", () => this.onDisconnect());
 		this.controller.on("play", (evt) => this.onPlayEvent(evt));
 		this.controller.on("pause", (evt) => this.onPauseEvent(evt));
 		this.controller.on("sync", (evt) => this.onSyncEvent(evt));
+	}
 
-		for await (const packet of this.connection.listen()) {
-			if (!this.listening) return;
-			switch (packet.type) {
-				case PacketType.PLAY_MEDIA:
-					this.onPlayPacket(packet);
-					break;
-				case PacketType.PAUSE_MEDIA:
-					this.onPausePacket(packet);
-					break;
-				case PacketType.SYNC_MEDIA:
-					this.onSyncPacket(packet);
-			}
+	public handle(packet: Packet): void {
+		switch (packet.type) {
+			case PacketType.PLAY_MEDIA:
+				this.onPlayPacket(packet);
+				break;
+			case PacketType.PAUSE_MEDIA:
+				this.onPausePacket(packet);
+				break;
+			case PacketType.SYNC_MEDIA:
+				this.onSyncPacket(packet);
 		}
 	}
 
-	private onDisconnect(): void {
-		this.listening = false;
-		this.emit("disconnect", undefined);
-	}
-
 	private onPlayEvent({ time, timestamp }: MediaPlayEvent): void {
-		this.connection.send({ type: PacketType.PLAY_MEDIA, time, timestamp });
+		this.emit("packet", { type: PacketType.PLAY_MEDIA, time, timestamp });
 	}
 
 	private onPauseEvent({ time }: MediaPauseEvent): void {
-		this.connection.send({ type: PacketType.PAUSE_MEDIA, time });
+		this.emit("packet", { type: PacketType.PAUSE_MEDIA, time });
 	}
 
 	private onSyncEvent({ time, timestamp }: MediaSyncEvent): void {
-		this.connection.send({ type: PacketType.SYNC_MEDIA, time, timestamp });
+		this.emit("packet", { type: PacketType.SYNC_MEDIA, time, timestamp });
 	}
 
 	private onPlayPacket(packet: Packet): void {
@@ -190,6 +176,24 @@ class MediaSyncClient extends EventEmitter<{ disconnect: void }> {
 			return;
 		}
 		this.controller.sync(packet.time, packet.timestamp);
+	}
+}
+
+class MediaSyncClient {
+	private readonly connection: Connection;
+	private readonly handler: MediaSyncPacketHandler;
+
+	constructor(connection: Connection, controller: MediaController) {
+		this.connection = connection;
+		this.handler = new MediaSyncPacketHandler(controller);
+	}
+
+	public async listen(): Promise<void> {
+		this.handler.on("packet", (packet) => this.connection.send(packet));
+
+		for await (const packet of this.connection.listen()) {
+			this.handler.handle(packet);
+		}
 	}
 }
 
