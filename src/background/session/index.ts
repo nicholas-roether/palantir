@@ -38,8 +38,8 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 		});
 	}
 
-	public openPort(href: string): MessagePort {
-		const name = `tab${this.tabId}/${encodeURIComponent(href)}`;
+	public openPort(): MessagePort {
+		const name = `tab:${this.tabId}`;
 		return MessagePort.connect(name);
 	}
 
