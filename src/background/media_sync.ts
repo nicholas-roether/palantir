@@ -192,3 +192,35 @@ class MediaSyncClient extends EventEmitter<{ disconnect: void }> {
 		this.controller.sync(packet.time, packet.timestamp);
 	}
 }
+
+const MEDIA_PACKET_TYPES = [
+	PacketType.PLAY_MEDIA,
+	PacketType.PAUSE_MEDIA,
+	PacketType.SYNC_MEDIA
+];
+
+class MediaSyncServer {
+	private readonly connections: Set<Connection>;
+
+	constructor() {
+		this.connections = new Set();
+	}
+
+	public async handle(connection: Connection): Promise<void> {
+		this.connections.add(connection);
+
+		for await (const packet of connection.listen()) {
+			if (!MEDIA_PACKET_TYPES.includes(packet.type)) continue;
+
+			for (const otherConn of this.connections) {
+				if (otherConn == connection) continue;
+
+				otherConn.send(packet);
+			}
+		}
+
+		this.connections.delete(connection);
+	}
+}
+
+export { MediaSyncClient, MediaSyncServer };
