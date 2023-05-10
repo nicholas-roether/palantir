@@ -1,4 +1,4 @@
-import { SessionServer } from "./session_server";
+import { SessionServer } from "./session/server";
 
 const sessionServer = new SessionServer();
 
