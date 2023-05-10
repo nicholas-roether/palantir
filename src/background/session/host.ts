@@ -6,6 +6,7 @@ import {
 	UserRole
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
+import { MediaSyncServer } from "../media_sync";
 import { Connection, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
@@ -22,6 +23,7 @@ class HostSessionHandler {
 	private readonly peer: Peer;
 	private readonly username;
 	private readonly auth: HostSessionAuth;
+	private readonly syncServer: MediaSyncServer;
 	private readonly connectedUsers: Set<ConnectedUser>;
 
 	constructor(session: Session, username: string) {
@@ -29,6 +31,7 @@ class HostSessionHandler {
 		this.peer = new Peer((conn) => this.onConnection(conn));
 		this.username = username;
 		this.auth = new HostSessionAuth();
+		this.syncServer = new MediaSyncServer();
 		this.connectedUsers = new Set();
 
 		this.session.on("closed", () => this.stop());
@@ -78,6 +81,20 @@ class HostSessionHandler {
 				`User ${authRes.username} has disconnected from session on tab ${this.session.tabId}`
 			);
 		});
+
+		await this.listen(connection);
+	}
+
+	private async listen(connection: Connection): Promise<void> {
+		for await (const packet of connection.listen()) {
+			switch (packet.type) {
+				case PacketType.START_MEDIA_SYNC:
+					this.syncServer.handle(connection);
+					break;
+				case PacketType.STOP_MEDIA_SYNC:
+					this.syncServer.disconnect(connection);
+			}
+		}
 	}
 
 	private sendSessionUpdate(): void {

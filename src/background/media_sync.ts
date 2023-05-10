@@ -210,6 +210,7 @@ class MediaSyncServer {
 		this.connections.add(connection);
 
 		for await (const packet of connection.listen()) {
+			if (!this.connections.has(connection)) return;
 			if (!MEDIA_PACKET_TYPES.includes(packet.type)) continue;
 
 			for (const otherConn of this.connections) {
@@ -219,6 +220,10 @@ class MediaSyncServer {
 			}
 		}
 
+		this.connections.delete(connection);
+	}
+
+	public disconnect(connection: Connection): void {
 		this.connections.delete(connection);
 	}
 }
