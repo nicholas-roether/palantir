@@ -188,12 +188,9 @@ class MediaSyncClient {
 		this.handler = new MediaSyncPacketHandler(controller);
 	}
 
-	public async listen(): Promise<void> {
+	public listen(): void {
 		this.handler.on("packet", (packet) => this.connection.send(packet));
-
-		for await (const packet of this.connection.listen()) {
-			this.handler.handle(packet);
-		}
+		this.connection.on("packet", (packet) => this.handler.handle(packet));
 	}
 }
 
@@ -210,21 +207,20 @@ class MediaSyncServer {
 		this.connections = new Set();
 	}
 
-	public async handle(connection: Connection): Promise<void> {
+	public handle(connection: Connection): void {
 		this.connections.add(connection);
 
-		for await (const packet of connection.listen()) {
-			if (!this.connections.has(connection)) return;
-			if (!MEDIA_PACKET_TYPES.includes(packet.type)) continue;
+		const packetListener = connection.on("packet", (packet) => {
+			if (!this.connections.has(connection)) {
+				connection.removeListener(packetListener);
+			}
+			if (!MEDIA_PACKET_TYPES.includes(packet.type)) return;
 
 			for (const otherConn of this.connections) {
 				if (otherConn == connection) continue;
-
 				otherConn.send(packet);
 			}
-		}
-
-		this.connections.delete(connection);
+		});
 	}
 
 	public disconnect(connection: Connection): void {

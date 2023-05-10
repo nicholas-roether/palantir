@@ -7,7 +7,7 @@ import {
 	UserRole
 } from "../../common/messages";
 import { ClientSessionAuth } from "../auth";
-import { Connection, Peer } from "../p2p";
+import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import { Session } from "./server";
 import { sessionLogger, sessionUpdatePacketSchema } from ".";
@@ -91,25 +91,23 @@ class ClientSessionHandler {
 			this.session.close(SessionCloseReason.DISCONNECTED);
 		});
 
-		await this.listen(connection);
+		connection.on("packet", (packet) => this.onPacket(packet));
 	}
 
-	private async listen(connection: Connection): Promise<void> {
-		for await (const packet of connection.listen()) {
-			log.debug(
-				`Client session on tab ${
-					this.session.tabId
-				} recieved packet: ${JSON.stringify(packet)}`
+	private onPacket(packet: Packet): void {
+		log.debug(
+			`Client session on tab ${
+				this.session.tabId
+			} recieved packet: ${JSON.stringify(packet)}`
+		);
+		if (packet.type != PacketType.SESSION_UPDATE) return;
+		if (!checkType(sessionUpdatePacketSchema, packet)) {
+			log.warn(
+				`Client session on tab ${this.session.tabId} received a malformed session update packet: ${sessionUpdatePacketSchema.reason}`
 			);
-			if (packet.type != PacketType.SESSION_UPDATE) continue;
-			if (!checkType(sessionUpdatePacketSchema, packet)) {
-				log.warn(
-					`Client session on tab ${this.session.tabId} received a malformed session update packet: ${sessionUpdatePacketSchema.reason}`
-				);
-				continue;
-			}
-			this.users = packet.users;
+			return;
 		}
+		this.users = packet.users;
 	}
 
 	private postStatusUpdate(): void {

@@ -7,7 +7,7 @@ import {
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
 import { MediaSyncServer } from "../media_sync";
-import { Connection, Peer } from "../p2p";
+import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
 
@@ -82,18 +82,16 @@ class HostSessionHandler {
 			);
 		});
 
-		await this.listen(connection);
+		connection.on("packet", (packet) => this.onPacket(packet, connection));
 	}
 
-	private async listen(connection: Connection): Promise<void> {
-		for await (const packet of connection.listen()) {
-			switch (packet.type) {
-				case PacketType.START_MEDIA_SYNC:
-					this.syncServer.handle(connection);
-					break;
-				case PacketType.STOP_MEDIA_SYNC:
-					this.syncServer.disconnect(connection);
-			}
+	private onPacket(packet: Packet, connection: Connection): void {
+		switch (packet.type) {
+			case PacketType.START_MEDIA_SYNC:
+				this.syncServer.handle(connection);
+				break;
+			case PacketType.STOP_MEDIA_SYNC:
+				this.syncServer.disconnect(connection);
 		}
 	}
 

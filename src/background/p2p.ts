@@ -114,14 +114,8 @@ interface ConnectionEventMap {
 	close: void;
 }
 
-type Resolver<T> = (val: T | null) => void;
-
 class Connection extends EventEmitter<ConnectionEventMap> {
 	private readonly connection: peerjs.DataConnection;
-	private readonly packetResolvers: [
-		res: Resolver<Packet | null>,
-		rej: Resolver<Error>
-	][];
 
 	constructor(connection: peerjs.DataConnection) {
 		super();
@@ -129,28 +123,10 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 		this.connection.on("data", (data) => this.onData(data));
 		this.connection.on("close", () => this.onClose());
 		this.connection.on("error", (err) => this.onError(err));
-
-		this.packetResolvers = [];
 	}
 
 	public get remoteId(): string {
 		return this.connection.peer;
-	}
-
-	public async expectIncoming(timeout: number): Promise<Packet | null> {
-		return await promiseWithTimeout(this.nextPacket(), null, timeout);
-	}
-
-	public async *listen(): AsyncGenerator<Packet, void, void> {
-		const packet = await this.nextPacket();
-		if (!packet) return;
-		yield packet;
-	}
-
-	public nextPacket(): Promise<Packet | null> {
-		return new Promise((res, rej) => {
-			this.addResolver(res, rej);
-		});
 	}
 
 	public send(data: Packet): void {
@@ -161,31 +137,19 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 		this.connection.close();
 	}
 
-	private addResolver(
-		res: Resolver<Packet | null>,
-		rej: Resolver<Error>
-	): void {
-		if (!this.connection.open) res(null);
-		else this.packetResolvers.push([res, rej]);
+	public async next(): Promise<Packet> {
+		return new Promise((res) => {
+			this.once("packet", res);
+		});
 	}
 
-	private handlePacket(packet: Packet | null): void {
-		let resolvers;
-		while ((resolvers = this.packetResolvers.pop())) resolvers[0](packet);
-	}
-
-	private handleError(error: Error): void {
-		let resolvers;
-		while ((resolvers = this.packetResolvers.pop())) resolvers[1](error);
-	}
-
-	private closeResolvers(): void {
-		this.handlePacket(null);
+	public async expect(timeout: number): Promise<Packet | null> {
+		return promiseWithTimeout(this.next(), null, timeout);
 	}
 
 	private onData(data: unknown): void {
 		if (checkType(packetSchema, data)) {
-			this.handlePacket(data);
+			this.emit("packet", data);
 		} else {
 			p2pLogger.error(
 				`Received malformed data from remote peer: ${packetSchema.reason}. Terminating connection.`
@@ -197,7 +161,6 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 	private onClose(): void {
 		p2pLogger.debug(`Connection with ${this.remoteId} closed`);
 
-		this.closeResolvers();
 		this.emit("close", undefined);
 	}
 
@@ -205,7 +168,6 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 		p2pLogger.error(
 			`Error in connection with ${this.remoteId}: ${err.message} (${err.name})`
 		);
-		this.handleError(err);
 		this.close();
 	}
 }
