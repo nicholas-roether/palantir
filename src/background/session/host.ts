@@ -6,7 +6,7 @@ import {
 	UserRole
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
-import { MediaSyncServer } from "../media_sync";
+import { MediaSyncServer, MediaSyncSubscription } from "../media_sync";
 import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
@@ -16,6 +16,7 @@ const log = sessionLogger.sub("host");
 interface ConnectedUser {
 	username: string;
 	connection: Connection;
+	syncSubscription: MediaSyncSubscription | null;
 }
 
 class HostSessionHandler {
@@ -67,7 +68,11 @@ class HostSessionHandler {
 			`User ${authRes.username} connected to host session on tab ${this.session.tabId}`
 		);
 
-		const user: ConnectedUser = { username: authRes.username, connection };
+		const user: ConnectedUser = {
+			username: authRes.username,
+			connection,
+			syncSubscription: null
+		};
 		this.connectedUsers.add(user);
 		await this.postStatusUpdate();
 		this.sendSessionUpdate();
@@ -82,16 +87,19 @@ class HostSessionHandler {
 			);
 		});
 
-		connection.on("packet", (packet) => this.onPacket(packet, connection));
+		connection.on("packet", (packet) => this.onPacket(packet, user));
 	}
 
-	private onPacket(packet: Packet, connection: Connection): void {
+	private onPacket(packet: Packet, user: ConnectedUser): void {
 		switch (packet.type) {
 			case PacketType.START_MEDIA_SYNC:
-				this.syncServer.handle(connection);
+				user.syncSubscription?.cancel();
+				user.syncSubscription = this.syncServer.subscribeRemote(
+					user.connection
+				);
 				break;
 			case PacketType.STOP_MEDIA_SYNC:
-				this.syncServer.disconnect(connection);
+				user.syncSubscription?.cancel();
 		}
 	}
 

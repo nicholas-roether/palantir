@@ -10,6 +10,7 @@ import { EventEmitter } from "../common/typed_events";
 import { Connection, Packet } from "./p2p";
 import PacketType from "./packets";
 import backgroundLogger from "./logger";
+import { PacketBus, PacketBusSubscription } from "./packet_bus";
 
 const log = backgroundLogger.sub("mediaSync");
 
@@ -113,14 +114,23 @@ class MediaSyncPacketHandler extends EventEmitter<{
 	packet: Packet;
 }> {
 	private readonly controller: MediaController;
+	private readonly playListener: number;
+	private readonly pauseListener: number;
+	private readonly syncListener: number;
 
 	constructor(controller: MediaController) {
 		super();
 
 		this.controller = controller;
-		this.controller.on("play", (evt) => this.onPlayEvent(evt));
-		this.controller.on("pause", (evt) => this.onPauseEvent(evt));
-		this.controller.on("sync", (evt) => this.onSyncEvent(evt));
+		this.playListener = this.controller.on("play", (evt) =>
+			this.onPlayEvent(evt)
+		);
+		this.pauseListener = this.controller.on("pause", (evt) =>
+			this.onPauseEvent(evt)
+		);
+		this.syncListener = this.controller.on("sync", (evt) =>
+			this.onSyncEvent(evt)
+		);
 	}
 
 	public handle(packet: Packet): void {
@@ -134,6 +144,12 @@ class MediaSyncPacketHandler extends EventEmitter<{
 			case PacketType.SYNC_MEDIA:
 				this.onSyncPacket(packet);
 		}
+	}
+
+	public stop(): void {
+		this.controller.removeListener(this.playListener);
+		this.controller.removeListener(this.pauseListener);
+		this.controller.removeListener(this.syncListener);
 	}
 
 	private onPlayEvent({ time, timestamp }: MediaPlayEvent): void {
@@ -182,6 +198,7 @@ class MediaSyncPacketHandler extends EventEmitter<{
 class MediaSyncClient {
 	private readonly connection: Connection;
 	private readonly handler: MediaSyncPacketHandler;
+	private packetListener?: number;
 
 	constructor(connection: Connection, controller: MediaController) {
 		this.connection = connection;
@@ -190,7 +207,16 @@ class MediaSyncClient {
 
 	public listen(): void {
 		this.handler.on("packet", (packet) => this.connection.send(packet));
-		this.connection.on("packet", (packet) => this.handler.handle(packet));
+		this.packetListener = this.connection.on("packet", (packet) =>
+			this.handler.handle(packet)
+		);
+	}
+
+	public stop(): void {
+		this.handler.stop();
+		if (this.packetListener) {
+			this.connection.removeListener(this.packetListener);
+		}
 	}
 }
 
@@ -200,32 +226,78 @@ const MEDIA_PACKET_TYPES = [
 	PacketType.SYNC_MEDIA
 ];
 
-class MediaSyncServer {
-	private readonly connections: Set<Connection>;
+interface MediaSyncSubscription {
+	cancel(): void;
+}
 
-	constructor() {
-		this.connections = new Set();
+class LocalMediaSyncSubscription implements MediaSyncSubscription {
+	private readonly subscription: PacketBusSubscription;
+	private readonly handler: MediaSyncPacketHandler;
+
+	constructor(
+		subscription: PacketBusSubscription,
+		controller: MediaController
+	) {
+		this.subscription = subscription;
+		this.handler = new MediaSyncPacketHandler(controller);
+		this.subscription.on("packet", (packet) => this.handler.handle(packet));
+		this.handler.on("packet", (packet) => this.subscription.send(packet));
 	}
 
-	public handle(connection: Connection): void {
-		this.connections.add(connection);
-
-		const packetListener = connection.on("packet", (packet) => {
-			if (!this.connections.has(connection)) {
-				connection.removeListener(packetListener);
-			}
-			if (!MEDIA_PACKET_TYPES.includes(packet.type)) return;
-
-			for (const otherConn of this.connections) {
-				if (otherConn == connection) continue;
-				otherConn.send(packet);
-			}
-		});
-	}
-
-	public disconnect(connection: Connection): void {
-		this.connections.delete(connection);
+	public cancel(): void {
+		this.subscription.cancel();
+		this.handler.stop();
 	}
 }
 
-export { MediaSyncClient, MediaSyncServer };
+class RemoteMediaSyncSubscription implements MediaSyncSubscription {
+	private readonly subscription: PacketBusSubscription;
+	private readonly connection: Connection;
+	private readonly incomingPacketListener: number;
+
+	constructor(subscription: PacketBusSubscription, connection: Connection) {
+		this.subscription = subscription;
+		this.connection = connection;
+		this.subscription.on("packet", (packet) =>
+			this.connection.send(packet)
+		);
+		this.incomingPacketListener = this.connection.on("packet", (packet) =>
+			this.onIncomingPacket(packet)
+		);
+	}
+
+	private onIncomingPacket(packet: Packet): void {
+		if (MEDIA_PACKET_TYPES.includes(packet.type)) {
+			this.subscription.send(packet);
+		}
+	}
+
+	public cancel(): void {
+		this.subscription.cancel();
+		this.connection.removeListener(this.incomingPacketListener);
+	}
+}
+
+class MediaSyncServer {
+	private readonly packetBus: PacketBus;
+
+	constructor() {
+		this.packetBus = new PacketBus();
+	}
+
+	public subscribeLocal(controller: MediaController): MediaSyncSubscription {
+		return new LocalMediaSyncSubscription(
+			this.packetBus.subscribe(),
+			controller
+		);
+	}
+
+	public subscribeRemote(connection: Connection): MediaSyncSubscription {
+		return new RemoteMediaSyncSubscription(
+			this.packetBus.subscribe(),
+			connection
+		);
+	}
+}
+
+export { MediaSyncClient, MediaSyncServer, MediaSyncSubscription };
