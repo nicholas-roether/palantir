@@ -1,33 +1,11 @@
 const enum MessageType {
-	FIND_VIDEOS,
-	VIDEO_FOUND,
 	CREATE_HOST_SESSION,
 	CREATE_CLIENT_SESSION,
 	CLOSE_SESSION,
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
-	REDIRECT,
-	PAGE_READY,
 	MEDIA_SYNC
-}
-
-class FindVideosMessage {
-	public readonly type = MessageType.FIND_VIDEOS;
-}
-
-interface ElementLocation {
-	readonly windowHref: string;
-	readonly query: string;
-}
-
-class VideosFoundMessage {
-	public readonly type = MessageType.VIDEO_FOUND;
-	public readonly locations: ElementLocation[];
-
-	constructor(locations: ElementLocation[]) {
-		this.locations = locations;
-	}
 }
 
 class CreateHostSessionMessage {
@@ -159,38 +137,18 @@ class MediaSyncMessage {
 	}
 }
 
-class RedirectMessage {
-	public readonly type = MessageType.REDIRECT;
-	public readonly href: string;
-
-	constructor(href: string) {
-		this.href = href;
-	}
-}
-
-class PageReadyMessage {
-	public readonly type = MessageType.PAGE_READY;
-}
-
 type Message =
-	| FindVideosMessage
-	| VideosFoundMessage
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
 	| CloseSessionMessage
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
-	| MediaSyncMessage
-	| RedirectMessage
-	| PageReadyMessage;
+	| MediaSyncMessage;
 
 export {
 	MessageType,
 	Message,
-	FindVideosMessage,
-	ElementLocation,
-	VideosFoundMessage,
 	CreateHostSessionMessage,
 	CreateClientSessionMessage,
 	CloseSessionMessage,
@@ -204,7 +162,5 @@ export {
 	SessionCloseReason,
 	SessionClosedMessage,
 	MediaSyncAction,
-	MediaSyncMessage,
-	RedirectMessage,
-	PageReadyMessage
+	MediaSyncMessage
 };
