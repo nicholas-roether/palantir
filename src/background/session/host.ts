@@ -6,7 +6,7 @@ import {
 	UserRole
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
-import { MediaSyncServer, MediaSyncSubscription } from "../media_sync";
+import MediaSyncServer, { MediaSyncSubscription } from "../media_sync/server";
 import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
