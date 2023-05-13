@@ -84,20 +84,20 @@ class MediaController extends EventEmitter<{
 		if (msg.type != MessageType.MEDIA_SYNC) return;
 		switch (msg.action) {
 			case MediaSyncAction.PLAY:
-				log.debug("Video played; broadcasting...");
+				log.debug(`Video played from ${msg.time}; broadcasting...`);
 				this.emit("play", {
 					time: msg.time,
 					timestamp: Date.now()
 				});
 				break;
 			case MediaSyncAction.PAUSE:
-				log.debug("Video paused; broadcasting...");
+				log.debug(`Video paused at ${msg.time}; broadcasting...`);
 				this.emit("pause", {
 					time: msg.time
 				});
 				break;
 			case MediaSyncAction.SYNC:
-				log.debug("Broadcasting new video time...");
+				log.debug(`Broadcasting new video time ${msg.time}...`);
 				this.emit("sync", {
 					time: msg.time,
 					timestamp: Date.now()
