@@ -4,7 +4,8 @@ import {
 	Message,
 	MessageType,
 	MediaSyncAction,
-	MediaSyncMessage
+	MediaSyncMessage,
+	RequestMediaHeartbeatMessage
 } from "../common/messages";
 import { EventEmitter } from "../common/typed_events";
 import { Connection, Packet } from "./p2p";
@@ -80,6 +81,10 @@ class MediaController extends EventEmitter<{
 		this.port.post(
 			new MediaSyncMessage(MediaSyncAction.SYNC, adjustedTime)
 		);
+	}
+
+	public requestHeartbeat(): void {
+		this.port.post(new RequestMediaHeartbeatMessage());
 	}
 
 	private onMessage(msg: Message): void {

@@ -5,7 +5,8 @@ const enum MessageType {
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
-	MEDIA_SYNC
+	MEDIA_SYNC,
+	REQUEST_MEDIA_HEARTBEAT
 }
 
 class CreateHostSessionMessage {
@@ -137,6 +138,10 @@ class MediaSyncMessage {
 	}
 }
 
+class RequestMediaHeartbeatMessage {
+	public readonly type = MessageType.REQUEST_MEDIA_HEARTBEAT;
+}
+
 type Message =
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
@@ -144,7 +149,8 @@ type Message =
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
-	| MediaSyncMessage;
+	| MediaSyncMessage
+	| RequestMediaHeartbeatMessage;
 
 export {
 	MessageType,
@@ -162,5 +168,6 @@ export {
 	SessionCloseReason,
 	SessionClosedMessage,
 	MediaSyncAction,
-	MediaSyncMessage
+	MediaSyncMessage,
+	RequestMediaHeartbeatMessage
 };
