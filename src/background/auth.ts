@@ -43,7 +43,7 @@ class HostSessionAuth {
 			`Authenticating connection from ${connection.remoteId}...`
 		);
 
-		const res = await connection.expectIncoming(RESPONSE_TIMEOUT);
+		const res = await connection.expect(RESPONSE_TIMEOUT);
 		if (!res) {
 			authLogger.error(
 				`Authentication of ${connection.remoteId} timed out`
@@ -100,7 +100,7 @@ class ClientSessionAuth {
 			username: this.username
 		});
 
-		const res = await connection.expectIncoming(RESPONSE_TIMEOUT);
+		const res = await connection.expect(RESPONSE_TIMEOUT);
 		if (!res) {
 			authLogger.error(
 				`Authentication to host ${connection.remoteId} timed out: ACK packet never received`

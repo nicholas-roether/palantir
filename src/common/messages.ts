@@ -1,54 +1,40 @@
 const enum MessageType {
-	FIND_VIDEOS,
-	VIDEO_FOUND,
 	CREATE_HOST_SESSION,
 	CREATE_CLIENT_SESSION,
 	CLOSE_SESSION,
 	GET_SESSION_STATUS,
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
-	VIDEO_SYNC,
-	START_VIDEO_SYNC,
-	STOP_VIDEO_SYNC,
-	REDIRECT,
-	PAGE_READY
-}
-
-class FindVideosMessage {
-	public readonly type = MessageType.FIND_VIDEOS;
-}
-
-interface ElementLocation {
-	readonly windowHref: string;
-	readonly query: string;
-}
-
-class VideosFoundMessage {
-	public readonly type = MessageType.VIDEO_FOUND;
-	public readonly locations: ElementLocation[];
-
-	constructor(locations: ElementLocation[]) {
-		this.locations = locations;
-	}
+	MEDIA_SYNC,
+	REQUEST_MEDIA_HEARTBEAT
 }
 
 class CreateHostSessionMessage {
 	public readonly type = MessageType.CREATE_HOST_SESSION;
 	public readonly tabId: number;
+	public readonly username: string;
 
-	constructor(tabId: number) {
+	constructor(tabId: number, username: string) {
 		this.tabId = tabId;
+		this.username = username;
 	}
 }
 
 class CreateClientSessionMessage {
 	public readonly type = MessageType.CREATE_CLIENT_SESSION;
 	public readonly tabId: number;
+	public readonly username: string;
 	public readonly hostId: string;
 	public readonly accessToken: string;
 
-	constructor(tabId: number, hostId: string, accessToken: string) {
+	constructor(
+		tabId: number,
+		username: string,
+		hostId: string,
+		accessToken: string
+	) {
 		this.tabId = tabId;
+		this.username = username;
 		this.hostId = hostId;
 		this.accessToken = accessToken;
 	}
@@ -135,72 +121,40 @@ class SessionClosedMessage {
 	}
 }
 
-const enum VideoSyncAction {
+const enum MediaSyncAction {
 	SYNC,
 	PAUSE,
 	PLAY
 }
 
-class VideoSyncMessage {
-	public readonly type = MessageType.VIDEO_SYNC;
-	public readonly action: VideoSyncAction;
+class MediaSyncMessage {
+	public readonly type = MessageType.MEDIA_SYNC;
+	public readonly action: MediaSyncAction;
 	public readonly time: number;
 
-	constructor(action: VideoSyncAction, time: number) {
+	constructor(action: MediaSyncAction, time: number) {
 		this.action = action;
 		this.time = time;
 	}
 }
 
-class StartVideoSyncMessage {
-	public readonly type = MessageType.START_VIDEO_SYNC;
-	public readonly query: string;
-	public readonly heartbeat: boolean;
-
-	constructor(query: string, heartbeat: boolean) {
-		this.query = query;
-		this.heartbeat = heartbeat;
-	}
-}
-
-class StopVideoSyncMessage {
-	public readonly type = MessageType.STOP_VIDEO_SYNC;
-}
-
-class RedirectMessage {
-	public readonly type = MessageType.REDIRECT;
-	public readonly href: string;
-
-	constructor(href: string) {
-		this.href = href;
-	}
-}
-
-class PageReadyMessage {
-	public readonly type = MessageType.PAGE_READY;
+class RequestMediaHeartbeatMessage {
+	public readonly type = MessageType.REQUEST_MEDIA_HEARTBEAT;
 }
 
 type Message =
-	| FindVideosMessage
-	| VideosFoundMessage
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
 	| CloseSessionMessage
 	| GetSessionStatusMessage
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
-	| VideoSyncMessage
-	| StartVideoSyncMessage
-	| StopVideoSyncMessage
-	| RedirectMessage
-	| PageReadyMessage;
+	| MediaSyncMessage
+	| RequestMediaHeartbeatMessage;
 
 export {
 	MessageType,
 	Message,
-	FindVideosMessage,
-	ElementLocation,
-	VideosFoundMessage,
 	CreateHostSessionMessage,
 	CreateClientSessionMessage,
 	CloseSessionMessage,
@@ -213,10 +167,7 @@ export {
 	SessionStatusUpdateMessage,
 	SessionCloseReason,
 	SessionClosedMessage,
-	VideoSyncAction,
-	VideoSyncMessage,
-	StartVideoSyncMessage,
-	StopVideoSyncMessage,
-	RedirectMessage,
-	PageReadyMessage
+	MediaSyncAction,
+	MediaSyncMessage,
+	RequestMediaHeartbeatMessage
 };

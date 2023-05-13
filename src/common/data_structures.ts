@@ -4,7 +4,7 @@ class IdentifierMap<T> {
 
 	constructor() {
 		this.map = new Map();
-		this.nextIdentifier = 0;
+		this.nextIdentifier = 1;
 	}
 
 	public add(value: T): number {
