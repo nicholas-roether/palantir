@@ -2,7 +2,10 @@ import { Connection, Packet } from "../p2p";
 import { PacketBus, PacketBusSubscription } from "../packet_bus";
 import PacketType from "../packets";
 import MediaController from "./controller";
+import mediaSyncLogger from "./logger";
 import MediaSyncPacketHandler from "./packet_handler";
+
+const log = mediaSyncLogger.sub("server");
 
 const MEDIA_PACKET_TYPES = [
 	PacketType.PLAY_MEDIA,
@@ -29,6 +32,8 @@ class LocalMediaSyncSubscription implements MediaSyncSubscription {
 	}
 
 	public cancel(): void {
+		log.info("Cancelling local sync subscription");
+
 		this.subscription.cancel();
 		this.handler.stop();
 	}
@@ -57,6 +62,10 @@ class RemoteMediaSyncSubscription implements MediaSyncSubscription {
 	}
 
 	public cancel(): void {
+		log.info(
+			`Cancelling remote sync subscription for ${this.connection.remoteId}`
+		);
+
 		this.subscription.cancel();
 		this.connection.removeListener(this.incomingPacketListener);
 	}
@@ -70,6 +79,8 @@ class MediaSyncServer {
 	}
 
 	public subscribeLocal(controller: MediaController): MediaSyncSubscription {
+		log.info("Adding local sync subscription");
+
 		return new LocalMediaSyncSubscription(
 			this.packetBus.subscribe(),
 			controller
@@ -77,6 +88,8 @@ class MediaSyncServer {
 	}
 
 	public subscribeRemote(connection: Connection): MediaSyncSubscription {
+		log.info(`Adding remote sync subscription for ${connection.remoteId}`);
+
 		return new RemoteMediaSyncSubscription(
 			this.packetBus.subscribe(),
 			connection

@@ -7,6 +7,9 @@ import {
 	RequestMediaHeartbeatMessage
 } from "../../common/messages";
 import { EventEmitter } from "../../common/typed_events";
+import mediaSyncLogger from "./logger";
+
+const log = mediaSyncLogger.sub("controller");
 
 interface MediaPlayEvent {
 	time: number;
@@ -39,6 +42,8 @@ class MediaController extends EventEmitter<{
 	}
 
 	public play(time: number, timestamp: number): void {
+		log.debug(`Playing video from ${time}`);
+
 		this.playing = true;
 		this.port.post(
 			new MediaSyncMessage(
@@ -49,6 +54,8 @@ class MediaController extends EventEmitter<{
 	}
 
 	public pause(time: number): void {
+		log.debug(`Pausing video at ${time}`);
+
 		this.playing = false;
 		this.port.post(new MediaSyncMessage(MediaSyncAction.PAUSE, time));
 	}
@@ -57,12 +64,19 @@ class MediaController extends EventEmitter<{
 		const adjustedTime = this.playing
 			? this.getAdjustedTime(time, timestamp)
 			: time;
+
+		log.debug(
+			`Synchronizing video to time ${adjustedTime} (recieved: ${time})`
+		);
+
 		this.port.post(
 			new MediaSyncMessage(MediaSyncAction.SYNC, adjustedTime)
 		);
 	}
 
 	public requestHeartbeat(): void {
+		log.debug("Requesting media heartbeat");
+
 		this.port.post(new RequestMediaHeartbeatMessage());
 	}
 
@@ -70,17 +84,20 @@ class MediaController extends EventEmitter<{
 		if (msg.type != MessageType.MEDIA_SYNC) return;
 		switch (msg.action) {
 			case MediaSyncAction.PLAY:
+				log.debug("Video played; broadcasting...");
 				this.emit("play", {
 					time: msg.time,
 					timestamp: Date.now()
 				});
 				break;
 			case MediaSyncAction.PAUSE:
+				log.debug("Video paused; broadcasting...");
 				this.emit("pause", {
 					time: msg.time
 				});
 				break;
 			case MediaSyncAction.SYNC:
+				log.debug("Broadcasting new video time...");
 				this.emit("sync", {
 					time: msg.time,
 					timestamp: Date.now()

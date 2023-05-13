@@ -1,6 +1,9 @@
 import { Connection } from "../p2p";
 import MediaController from "./controller";
+import mediaSyncLogger from "./logger";
 import MediaSyncPacketHandler from "./packet_handler";
+
+const log = mediaSyncLogger.sub("client");
 
 class MediaSyncClient {
 	private readonly connection: Connection;
@@ -17,6 +20,10 @@ class MediaSyncClient {
 		this.packetListener = this.connection.on("packet", (packet) =>
 			this.handler.handle(packet)
 		);
+
+		log.info(
+			`Media sync client is listening on connection with ${this.connection.remoteId}`
+		);
 	}
 
 	public stop(): void {
@@ -24,6 +31,10 @@ class MediaSyncClient {
 		if (this.packetListener) {
 			this.connection.removeListener(this.packetListener);
 		}
+
+		log.info(
+			`Media sync client on connection with ${this.connection.remoteId} has stopped.`
+		);
 	}
 }
 
