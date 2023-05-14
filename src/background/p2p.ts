@@ -137,14 +137,8 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 		this.connection.close();
 	}
 
-	public async next(): Promise<Packet> {
-		return new Promise((res) => {
-			this.once("packet", res);
-		});
-	}
-
 	public async expect(timeout: number): Promise<Packet | null> {
-		return promiseWithTimeout(this.next(), null, timeout);
+		return promiseWithTimeout(this.once("packet"), null, timeout);
 	}
 
 	private onData(data: unknown): void {

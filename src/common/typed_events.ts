@@ -25,13 +25,12 @@ class EventEmitter<M> {
 		return this.listeners.add([type, listener]);
 	}
 
-	public once<T extends keyof M & string>(
-		type: T,
-		handler: EventHandler<M[T]>
-	): void {
-		const id = this.on(type, (evt) => {
-			handler(evt);
-			this.removeListener(id);
+	public once<T extends keyof M & string>(type: T): Promise<M[T]> {
+		return new Promise((res) => {
+			const id = this.on(type, (evt) => {
+				res(evt);
+				this.removeListener(id);
+			});
 		});
 	}
 
