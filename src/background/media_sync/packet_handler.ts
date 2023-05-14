@@ -8,6 +8,7 @@ import MediaController, {
 	MediaSyncEvent
 } from "./controller";
 import mediaSyncLogger from "./logger";
+import { MessagePort } from "../../common/message_port";
 
 const log = mediaSyncLogger.sub("packetHandler");
 
@@ -33,10 +34,10 @@ class MediaSyncPacketHandler extends EventEmitter<{
 	private readonly pauseListener: number;
 	private readonly syncListener: number;
 
-	constructor(controller: MediaController) {
+	constructor(port: MessagePort) {
 		super();
 
-		this.controller = controller;
+		this.controller = new MediaController(port);
 		this.playListener = this.controller.on("play", (evt) =>
 			this.onPlayEvent(evt)
 		);

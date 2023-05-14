@@ -6,7 +6,9 @@ const enum MessageType {
 	SESSION_STATUS_UPDATE,
 	SESSION_CLOSED,
 	MEDIA_SYNC,
-	REQUEST_MEDIA_HEARTBEAT
+	REQUEST_MEDIA_HEARTBEAT,
+	CONNECT_MEDIA_ELEMENT,
+	MEDIA_ELEMENT_CONNECTION_RESULT
 }
 
 class CreateHostSessionMessage {
@@ -142,6 +144,24 @@ class RequestMediaHeartbeatMessage {
 	public readonly type = MessageType.REQUEST_MEDIA_HEARTBEAT;
 }
 
+class ConnectMediaElementMessage {
+	public readonly type = MessageType.CONNECT_MEDIA_ELEMENT;
+	public readonly elementQuery: string;
+
+	constructor(elementQuery: string) {
+		this.elementQuery = elementQuery;
+	}
+}
+
+class MediaElementConnectionResultMessage {
+	public readonly type = MessageType.MEDIA_ELEMENT_CONNECTION_RESULT;
+	public readonly connected: boolean;
+
+	constructor(connected: boolean) {
+		this.connected = connected;
+	}
+}
+
 type Message =
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
@@ -150,7 +170,9 @@ type Message =
 	| SessionStatusUpdateMessage
 	| SessionClosedMessage
 	| MediaSyncMessage
-	| RequestMediaHeartbeatMessage;
+	| RequestMediaHeartbeatMessage
+	| ConnectMediaElementMessage
+	| MediaElementConnectionResultMessage;
 
 export {
 	MessageType,
@@ -169,5 +191,7 @@ export {
 	SessionClosedMessage,
 	MediaSyncAction,
 	MediaSyncMessage,
-	RequestMediaHeartbeatMessage
+	RequestMediaHeartbeatMessage,
+	ConnectMediaElementMessage,
+	MediaElementConnectionResultMessage
 };
