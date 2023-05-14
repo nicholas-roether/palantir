@@ -6,7 +6,7 @@ import {
 	UserRole
 } from "../../common/messages";
 import { EventEmitter } from "../../common/typed_events";
-import { MessagePort, messageBus } from "../../common/message_port";
+import { messageBus } from "../../common/message_port";
 import sessionLogger from "./logger";
 
 const sessionUpdatePacketSchema = ty.object({
@@ -36,11 +36,6 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 		browser.tabs.onRemoved.addListener((tabId) => {
 			if (tabId == this.tab.id) this.close(SessionCloseReason.TAB_CLOSED);
 		});
-	}
-
-	public openPort(): MessagePort {
-		const name = `tab:${this.tabId}`;
-		return MessagePort.connect(name);
 	}
 
 	public close(reason: SessionCloseReason): void {
