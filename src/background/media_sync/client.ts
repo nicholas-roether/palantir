@@ -1,12 +1,12 @@
 import ty, { checkType } from "lifeboat";
 import { Connection, Packet } from "../p2p";
 import mediaSyncLogger from "./logger";
-import MediaSyncPacketHandler from "./packet_handler";
 import PacketType from "../packets";
 import { MessagePort } from "../../common/message_port";
 import { frameAddress } from "../../common/addresses";
 import { ConnectMediaElementMessage, MessageType } from "../../common/messages";
 import { promiseWithTimeout } from "../../common/utils";
+import MediaController from "./controller";
 
 const log = mediaSyncLogger.sub("client");
 
@@ -21,7 +21,7 @@ const FRAME_RESPONSE_TIMEOUT = 100; // ms
 class MediaSyncClient {
 	private readonly connection: Connection;
 	private readonly tabId: number;
-	private handler: MediaSyncPacketHandler | null = null;
+	private controller: MediaController | null = null;
 	private packetListener?: number;
 
 	constructor(connection: Connection, tabId: number) {
@@ -41,7 +41,7 @@ class MediaSyncClient {
 	}
 
 	public stop(): void {
-		this.handler?.stop();
+		this.controller?.stop();
 		if (this.packetListener) {
 			this.connection.removeListener(this.packetListener);
 		}
@@ -58,7 +58,7 @@ class MediaSyncClient {
 				this.onInitPacket(packet);
 				break;
 			default:
-				this.handler?.handle(packet);
+				this.controller?.handle(packet);
 		}
 	}
 
@@ -79,9 +79,9 @@ class MediaSyncClient {
 		const success = await this.connectElement(port, packet.elementQuery);
 		if (!success) return;
 
-		const handler = new MediaSyncPacketHandler(port);
-		this.handler?.stop();
-		this.handler = handler;
+		const controller = new MediaController(port);
+		this.controller?.stop();
+		this.controller = controller;
 	}
 
 	private async navigateTo(href: string): Promise<void> {

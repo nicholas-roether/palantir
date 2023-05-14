@@ -123,19 +123,13 @@ class SessionClosedMessage {
 	}
 }
 
-const enum MediaSyncAction {
-	SYNC,
-	PAUSE,
-	PLAY
-}
-
 class MediaSyncMessage {
 	public readonly type = MessageType.MEDIA_SYNC;
-	public readonly action: MediaSyncAction;
+	public readonly playing: boolean;
 	public readonly time: number;
 
-	constructor(action: MediaSyncAction, time: number) {
-		this.action = action;
+	constructor(playing: boolean, time: number) {
+		this.playing = playing;
 		this.time = time;
 	}
 }
@@ -189,7 +183,6 @@ export {
 	SessionStatusUpdateMessage,
 	SessionCloseReason,
 	SessionClosedMessage,
-	MediaSyncAction,
 	MediaSyncMessage,
 	RequestMediaHeartbeatMessage,
 	ConnectMediaElementMessage,

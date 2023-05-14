@@ -1,6 +1,6 @@
+import ty, { checkType } from "lifeboat";
 import { MessagePort } from "../../common/message_port";
 import {
-	MediaSyncAction,
 	MediaSyncMessage,
 	Message,
 	MessageType,
@@ -8,70 +8,51 @@ import {
 } from "../../common/messages";
 import { EventEmitter } from "../../common/typed_events";
 import mediaSyncLogger from "./logger";
+import { Packet } from "../p2p";
+import PacketType from "../packets";
 
 const log = mediaSyncLogger.sub("controller");
 
-interface MediaPlayEvent {
-	time: number;
-	timestamp: number;
-}
-
-interface MediaPauseEvent {
-	time: number;
-}
-
-interface MediaSyncEvent {
-	time: number;
-	timestamp: number;
-}
+const syncMediaPacketSchema = ty.object({
+	playing: ty.boolean(),
+	time: ty.number(),
+	timestamp: ty.number()
+});
 
 class MediaController extends EventEmitter<{
-	play: MediaPlayEvent;
-	pause: MediaPauseEvent;
-	sync: MediaSyncEvent;
+	packet: Packet;
 	disconnect: void;
 }> {
 	private readonly port: MessagePort;
-	private playing = false;
+	private readonly messageListener: number;
 
 	constructor(port: MessagePort) {
 		super();
 		this.port = port;
-		this.port.on("message", (msg) => this.onMessage(msg));
+		this.messageListener = this.port.on("message", (msg) =>
+			this.onMessage(msg)
+		);
 		this.port.on("close", () => this.emit("disconnect", undefined));
 	}
 
-	public play(time: number, timestamp: number): void {
-		log.debug(`Playing video from ${time}`);
+	public handle(packet: Packet): void {
+		if (packet.type != PacketType.SYNC_MEDIA) return;
+		if (!checkType(syncMediaPacketSchema, packet)) {
+			log.error(
+				`Received invalid SYNC_MEDIA packet: ${syncMediaPacketSchema.reason}`
+			);
+			return;
+		}
 
-		this.playing = true;
-		this.port.post(
-			new MediaSyncMessage(
-				MediaSyncAction.PLAY,
-				this.getAdjustedTime(time, timestamp)
-			)
-		);
+		const time = packet.playing
+			? this.getAdjustedTime(packet.time, packet.timestamp)
+			: packet.time;
+
+		this.port.post(new MediaSyncMessage(packet.playing, time));
 	}
 
-	public pause(time: number): void {
-		log.debug(`Pausing video at ${time}`);
-
-		this.playing = false;
-		this.port.post(new MediaSyncMessage(MediaSyncAction.PAUSE, time));
-	}
-
-	public sync(time: number, timestamp: number): void {
-		const adjustedTime = this.playing
-			? this.getAdjustedTime(time, timestamp)
-			: time;
-
-		log.debug(
-			`Synchronizing video to time ${adjustedTime} (recieved: ${time})`
-		);
-
-		this.port.post(
-			new MediaSyncMessage(MediaSyncAction.SYNC, adjustedTime)
-		);
+	public stop(): void {
+		this.port.removeListener(this.messageListener);
 	}
 
 	public requestHeartbeat(): void {
@@ -82,27 +63,12 @@ class MediaController extends EventEmitter<{
 
 	private onMessage(msg: Message): void {
 		if (msg.type != MessageType.MEDIA_SYNC) return;
-		switch (msg.action) {
-			case MediaSyncAction.PLAY:
-				log.debug(`Video played from ${msg.time}; broadcasting...`);
-				this.emit("play", {
-					time: msg.time,
-					timestamp: Date.now()
-				});
-				break;
-			case MediaSyncAction.PAUSE:
-				log.debug(`Video paused at ${msg.time}; broadcasting...`);
-				this.emit("pause", {
-					time: msg.time
-				});
-				break;
-			case MediaSyncAction.SYNC:
-				log.debug(`Broadcasting new video time ${msg.time}...`);
-				this.emit("sync", {
-					time: msg.time,
-					timestamp: Date.now()
-				});
-		}
+		this.emit("packet", {
+			type: PacketType.SYNC_MEDIA,
+			playing: msg.playing,
+			time: msg.time,
+			timestamp: Date.now()
+		});
 	}
 
 	private getAdjustedTime(time: number, timestamp: number): number {
@@ -112,5 +78,3 @@ class MediaController extends EventEmitter<{
 }
 
 export default MediaController;
-
-export { MediaPlayEvent, MediaPauseEvent, MediaSyncEvent };
