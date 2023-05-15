@@ -44,11 +44,9 @@ class MediaController extends EventEmitter<{
 			return;
 		}
 
-		const time = packet.playing
-			? this.getAdjustedTime(packet.time, packet.timestamp)
-			: packet.time;
-
-		this.port.post(new MediaSyncMessage(packet.playing, time));
+		this.port.post(
+			new MediaSyncMessage(packet.playing, packet.time, packet.timestamp)
+		);
 	}
 
 	public stop(): void {
@@ -69,11 +67,6 @@ class MediaController extends EventEmitter<{
 			time: msg.time,
 			timestamp: Date.now()
 		});
-	}
-
-	private getAdjustedTime(time: number, timestamp: number): number {
-		const travelTime = Date.now() - timestamp;
-		return time + travelTime;
 	}
 }
 

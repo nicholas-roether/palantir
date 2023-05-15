@@ -127,10 +127,12 @@ class MediaSyncMessage {
 	public readonly type = MessageType.MEDIA_SYNC;
 	public readonly playing: boolean;
 	public readonly time: number;
+	public readonly timestamp: number;
 
-	constructor(playing: boolean, time: number) {
+	constructor(playing: boolean, time: number, timestamp: number) {
 		this.playing = playing;
 		this.time = time;
+		this.timestamp = timestamp;
 	}
 }
 
