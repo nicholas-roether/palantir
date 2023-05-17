@@ -46,7 +46,7 @@ class MediaSyncServer {
 	}
 
 	public subscribeHost(tabId: number): MediaSyncHost {
-		log.info("Adding local sync subscription");
+		log.info("Adding host sync subscription");
 
 		return new MediaSyncHost(tabId, this.packetBus.subscribe());
 	}
