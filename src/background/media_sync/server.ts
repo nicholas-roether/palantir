@@ -6,11 +6,7 @@ import mediaSyncLogger from "./logger";
 
 const log = mediaSyncLogger.sub("server");
 
-interface SyncSubscription {
-	cancel(): void;
-}
-
-class ClientSyncSubscription implements SyncSubscription {
+class SyncSubscription {
 	private readonly subscription: PacketBusSubscription;
 	private readonly connection: Connection;
 	private readonly incomingPacketListener: number;
@@ -32,7 +28,7 @@ class ClientSyncSubscription implements SyncSubscription {
 		}
 	}
 
-	public cancel(): void {
+	public stop(): void {
 		log.info(
 			`Cancelling remote sync subscription for ${this.connection.remoteId}`
 		);
@@ -58,10 +54,7 @@ class MediaSyncServer {
 	public subscribeClient(connection: Connection): SyncSubscription {
 		log.info(`Adding client sync subscription for ${connection.remoteId}`);
 
-		return new ClientSyncSubscription(
-			this.packetBus.subscribe(),
-			connection
-		);
+		return new SyncSubscription(this.packetBus.subscribe(), connection);
 	}
 }
 

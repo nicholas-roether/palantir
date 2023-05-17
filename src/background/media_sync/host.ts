@@ -6,7 +6,6 @@ import { PacketBusSubscription } from "../packet_bus";
 import PacketType from "../packets";
 import MediaController from "./controller";
 import mediaSyncLogger from "./logger";
-import { SyncSubscription } from "./server";
 
 const log = mediaSyncLogger.sub("host");
 
@@ -22,7 +21,7 @@ interface MediaOption {
 
 const DISCOVERY_TIMEOUT = 100; // ms
 
-class MediaSyncHost implements SyncSubscription {
+class MediaSyncHost {
 	private readonly tabId: number;
 	private readonly subscription: PacketBusSubscription;
 	private media: Media | null = null;
@@ -45,7 +44,7 @@ class MediaSyncHost implements SyncSubscription {
 		log.info("Media sync host has started");
 	}
 
-	public cancel(): void {
+	public stop(): void {
 		this.subscription.cancel();
 
 		log.info("Media sync host has stopped");

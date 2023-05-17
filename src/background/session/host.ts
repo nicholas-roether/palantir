@@ -59,6 +59,7 @@ class HostSessionHandler {
 
 	public stop(): void {
 		this.peer.close();
+		this.syncHost.stop();
 	}
 
 	private async onConnection(connection: Connection): Promise<void> {
@@ -96,13 +97,13 @@ class HostSessionHandler {
 	private onPacket(packet: Packet, user: ConnectedUser): void {
 		switch (packet.type) {
 			case PacketType.START_MEDIA_SYNC:
-				user.syncSubscription?.cancel();
+				user.syncSubscription?.stop();
 				user.syncSubscription = this.syncServer.subscribeClient(
 					user.connection
 				);
 				break;
 			case PacketType.STOP_MEDIA_SYNC:
-				user.syncSubscription?.cancel();
+				user.syncSubscription?.stop();
 		}
 	}
 
