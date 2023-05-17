@@ -63,6 +63,10 @@ class MediaSyncHost {
 		const availableMedia = await this.discoverMedia();
 		this.media = this.selectMedia(availableMedia);
 
+		log.info(
+			`Connecting to media element at ${this.media.elementQuery} in frame ${this.media.frameHref}`
+		);
+
 		const addr = frameAddress(this.tabId, this.media.frameHref);
 		const port = MessagePort.connect(addr);
 		this.controller = new MediaController(port);
@@ -96,6 +100,8 @@ class MediaSyncHost {
 	}
 
 	private discoverMedia(): Promise<MediaOption[]> {
+		log.info("Starting media discovery");
+
 		const promise = new Promise<MediaOption[]>((res) => {
 			const media: MediaOption[] = [];
 			const listener = messageBus.on("message", (msg) => {

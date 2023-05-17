@@ -9,7 +9,7 @@ import MediaElementController from "./controller";
 import { discoverMedia } from "./discover";
 import frameLogger from "./logger";
 
-const log = frameLogger.sub(location.hostname);
+const log = frameLogger;
 
 function onBusMessage(message: Message): void {
 	if (message.type == MessageType.DISCOVER_MEDIA) discoverMedia();
