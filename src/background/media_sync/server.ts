@@ -1,42 +1,16 @@
 import { Connection, Packet } from "../p2p";
 import { PacketBus, PacketBusSubscription } from "../packet_bus";
 import PacketType from "../packets";
-import MediaController from "./controller";
+import MediaSyncHost from "./host";
 import mediaSyncLogger from "./logger";
 
 const log = mediaSyncLogger.sub("server");
 
-interface MediaSyncSubscription {
+interface SyncSubscription {
 	cancel(): void;
 }
 
-class LocalMediaSyncSubscription implements MediaSyncSubscription {
-	private readonly subscription: PacketBusSubscription;
-	private readonly controller: MediaController;
-
-	constructor(
-		subscription: PacketBusSubscription,
-		controller: MediaController
-	) {
-		this.subscription = subscription;
-		this.controller = controller;
-		this.subscription.on("packet", (packet) =>
-			this.controller.handle(packet)
-		);
-		this.controller.on("packet", (packet) =>
-			this.subscription.send(packet)
-		);
-	}
-
-	public cancel(): void {
-		log.info("Cancelling local sync subscription");
-
-		this.subscription.cancel();
-		this.controller.stop();
-	}
-}
-
-class RemoteMediaSyncSubscription implements MediaSyncSubscription {
+class ClientSyncSubscription implements SyncSubscription {
 	private readonly subscription: PacketBusSubscription;
 	private readonly connection: Connection;
 	private readonly incomingPacketListener: number;
@@ -75,19 +49,16 @@ class MediaSyncServer {
 		this.packetBus = new PacketBus();
 	}
 
-	public subscribeLocal(controller: MediaController): MediaSyncSubscription {
+	public subscribeHost(tabId: number): MediaSyncHost {
 		log.info("Adding local sync subscription");
 
-		return new LocalMediaSyncSubscription(
-			this.packetBus.subscribe(),
-			controller
-		);
+		return new MediaSyncHost(tabId, this.packetBus.subscribe());
 	}
 
-	public subscribeRemote(connection: Connection): MediaSyncSubscription {
-		log.info(`Adding remote sync subscription for ${connection.remoteId}`);
+	public subscribeClient(connection: Connection): SyncSubscription {
+		log.info(`Adding client sync subscription for ${connection.remoteId}`);
 
-		return new RemoteMediaSyncSubscription(
+		return new ClientSyncSubscription(
 			this.packetBus.subscribe(),
 			connection
 		);
@@ -96,4 +67,4 @@ class MediaSyncServer {
 
 export default MediaSyncServer;
 
-export { MediaSyncSubscription };
+export { SyncSubscription };

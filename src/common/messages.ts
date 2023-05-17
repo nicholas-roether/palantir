@@ -8,7 +8,9 @@ const enum MessageType {
 	MEDIA_SYNC,
 	REQUEST_MEDIA_HEARTBEAT,
 	CONNECT_MEDIA_ELEMENT,
-	MEDIA_ELEMENT_CONNECTION_RESULT
+	MEDIA_ELEMENT_CONNECTION_RESULT,
+	DISCOVER_MEDIA,
+	MEDIA_FOUND
 }
 
 class CreateHostSessionMessage {
@@ -158,6 +160,23 @@ class MediaElementConnectionResultMessage {
 	}
 }
 
+class DiscoverMediaMessage {
+	public readonly type = MessageType.DISCOVER_MEDIA;
+}
+
+class MediaFoundMessage {
+	public readonly type = MessageType.MEDIA_FOUND;
+	public readonly frameHref: string;
+	public readonly elementQuery: string;
+	public readonly score: number;
+
+	constructor(frameHref: string, elementQuery: string, score: number) {
+		this.frameHref = frameHref;
+		this.elementQuery = elementQuery;
+		this.score = score;
+	}
+}
+
 type Message =
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
@@ -168,7 +187,9 @@ type Message =
 	| MediaSyncMessage
 	| RequestMediaHeartbeatMessage
 	| ConnectMediaElementMessage
-	| MediaElementConnectionResultMessage;
+	| MediaElementConnectionResultMessage
+	| DiscoverMediaMessage
+	| MediaFoundMessage;
 
 export {
 	MessageType,
@@ -188,5 +209,7 @@ export {
 	MediaSyncMessage,
 	RequestMediaHeartbeatMessage,
 	ConnectMediaElementMessage,
-	MediaElementConnectionResultMessage
+	MediaElementConnectionResultMessage,
+	DiscoverMediaMessage,
+	MediaFoundMessage
 };

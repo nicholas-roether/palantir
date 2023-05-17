@@ -6,7 +6,8 @@ import {
 	UserRole
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
-import MediaSyncServer, { MediaSyncSubscription } from "../media_sync/server";
+import MediaSyncHost from "../media_sync/host";
+import MediaSyncServer, { SyncSubscription } from "../media_sync/server";
 import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
@@ -16,7 +17,7 @@ const log = sessionLogger.sub("host");
 interface ConnectedUser {
 	username: string;
 	connection: Connection;
-	syncSubscription: MediaSyncSubscription | null;
+	syncSubscription: SyncSubscription | null;
 }
 
 class HostSessionHandler {
@@ -25,6 +26,7 @@ class HostSessionHandler {
 	private readonly username;
 	private readonly auth: HostSessionAuth;
 	private readonly syncServer: MediaSyncServer;
+	private readonly syncHost: MediaSyncHost;
 	private readonly connectedUsers: Set<ConnectedUser>;
 
 	constructor(session: Session, username: string) {
@@ -33,6 +35,7 @@ class HostSessionHandler {
 		this.username = username;
 		this.auth = new HostSessionAuth();
 		this.syncServer = new MediaSyncServer();
+		this.syncHost = this.syncServer.subscribeHost(this.session.tabId);
 		this.connectedUsers = new Set();
 
 		this.session.on("closed", () => this.stop());
@@ -94,7 +97,7 @@ class HostSessionHandler {
 		switch (packet.type) {
 			case PacketType.START_MEDIA_SYNC:
 				user.syncSubscription?.cancel();
-				user.syncSubscription = this.syncServer.subscribeRemote(
+				user.syncSubscription = this.syncServer.subscribeClient(
 					user.connection
 				);
 				break;
