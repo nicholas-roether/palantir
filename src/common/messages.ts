@@ -111,7 +111,8 @@ const enum SessionCloseReason {
 	SUPERSEDED,
 	TAB_CLOSED,
 	CLOSED_BY_USER,
-	TIMEOUT
+	TIMEOUT,
+	NO_MEDIA
 }
 
 class SessionClosedMessage {

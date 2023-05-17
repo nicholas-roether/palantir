@@ -1,6 +1,11 @@
 import { frameAddress } from "../../common/addresses";
 import { MessagePort, messageBus } from "../../common/message_port";
-import { DiscoverMediaMessage, MessageType } from "../../common/messages";
+import {
+	DiscoverMediaMessage,
+	MessageType,
+	SessionCloseReason
+} from "../../common/messages";
+import { EventEmitter } from "../../common/typed_events";
 import { Connection, Packet } from "../p2p";
 import { PacketBusSubscription } from "../packet_bus";
 import PacketType from "../packets";
@@ -21,13 +26,15 @@ interface MediaOption {
 
 const DISCOVERY_TIMEOUT = 100; // ms
 
-class MediaSyncHost {
+class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 	private readonly tabId: number;
 	private readonly subscription: PacketBusSubscription;
 	private media: Media | null = null;
 	private controller: MediaController | null = null;
 
 	constructor(tabId: number, subscription: PacketBusSubscription) {
+		super();
+
 		this.tabId = tabId;
 		this.subscription = subscription;
 		this.subscription.on("packet", (packet) => this.onPacket(packet));
@@ -62,6 +69,12 @@ class MediaSyncHost {
 	private async connectToFrame(): Promise<void> {
 		const availableMedia = await this.discoverMedia();
 		this.media = this.selectMedia(availableMedia);
+
+		if (!this.media) {
+			log.info("No suitable media elements found in page");
+			this.emit("close", SessionCloseReason.NO_MEDIA);
+			return;
+		}
 
 		log.info(
 			`Connecting to media element at ${this.media.elementQuery} in frame ${this.media.frameHref}`
@@ -125,7 +138,9 @@ class MediaSyncHost {
 		return promise;
 	}
 
-	private selectMedia(options: MediaOption[]): Media {
+	private selectMedia(options: MediaOption[]): Media | null {
+		if (options.length == 0) return null;
+
 		let bestOption = options[0];
 		for (let i = 1; i < options.length; i++) {
 			if (options[i].score > bestOption.score) {

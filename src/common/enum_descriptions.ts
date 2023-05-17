@@ -16,6 +16,8 @@ function describeSessionCloseReason(reason: SessionCloseReason): string {
 			return "Authorization failed";
 		case SessionCloseReason.UNKNOWN:
 			return "Unknown reason";
+		case SessionCloseReason.NO_MEDIA:
+			return "No suitable media found in page";
 	}
 }
 

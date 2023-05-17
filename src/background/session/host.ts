@@ -39,6 +39,7 @@ class HostSessionHandler {
 		this.connectedUsers = new Set();
 
 		this.session.on("closed", () => this.stop());
+		this.syncHost.on("close", (reason) => this.session.close(reason));
 	}
 
 	public async getId(): Promise<string> {
