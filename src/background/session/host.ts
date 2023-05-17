@@ -51,6 +51,8 @@ class HostSessionHandler {
 	}
 
 	public start(): void {
+		if (!this.session.isOpen()) return;
+
 		this.peer.listen();
 		this.postStatusUpdate();
 		this.syncHost.start();

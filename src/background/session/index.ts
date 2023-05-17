@@ -21,7 +21,7 @@ const sessionUpdatePacketSchema = ty.object({
 class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 	public readonly tabId: number;
 	private readonly tab: browser.tabs.Tab;
-	private isOpen = true;
+	private open = true;
 	private status: SessionStatus | null = null;
 
 	constructor(tab: browser.tabs.Tab) {
@@ -39,8 +39,8 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 	}
 
 	public close(reason: SessionCloseReason): void {
-		if (!this.isOpen) return;
-		this.isOpen = false;
+		if (!this.open) return;
+		this.open = false;
 		this.status = null;
 		this.emit("closed", reason);
 		this.broadcastStatus();
@@ -53,9 +53,13 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 	}
 
 	public postStatusUpdate(status: SessionStatus): void {
-		if (!this.isOpen) return;
+		if (!this.open) return;
 		this.status = status;
 		this.broadcastStatus();
+	}
+
+	public isOpen(): boolean {
+		return this.open;
 	}
 }
 

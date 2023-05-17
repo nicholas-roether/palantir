@@ -24,7 +24,7 @@ interface MediaOption {
 	score: number;
 }
 
-const DISCOVERY_TIMEOUT = 100; // ms
+const DISCOVERY_TIMEOUT = 500; // ms
 
 class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 	private readonly tabId: number;

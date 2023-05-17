@@ -43,6 +43,8 @@ class ClientSessionHandler {
 	}
 
 	public start(): void {
+		if (!this.session.isOpen()) return;
+
 		setTimeout(() => {
 			if (this.connectionState != ConnectionState.CONNECTED) {
 				this.session.close(SessionCloseReason.TIMEOUT);
