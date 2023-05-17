@@ -1,5 +1,5 @@
-function frameAddress(tabId: number, frameHref: string): string {
-	return `tab:${tabId}/${encodeURIComponent(frameHref)}`;
+function frameAddress(frameHref: string): string {
+	return `frame:${encodeURIComponent(frameHref)}`;
 }
 
 export { frameAddress };

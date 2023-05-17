@@ -35,18 +35,6 @@ async function handlePort(port: MessagePort): Promise<void> {
 	port.post(new MediaElementConnectionResultMessage(true));
 }
 
-async function main(): Promise<void> {
-	const tab = await browser.tabs.getCurrent();
-	if (!tab || !tab.id) {
-		log.warn(
-			"Could not get a tab id in this context, no media controller will be opened"
-		);
-		return;
-	}
+messageBus.on("message", onBusMessage);
 
-	messageBus.on("message", onBusMessage);
-
-	MessagePort.listen(frameAddress(tab.id, location.href), handlePort);
-}
-
-main();
+MessagePort.listen(frameAddress(location.href), handlePort);

@@ -3,7 +3,6 @@ import { Connection, Packet } from "../p2p";
 import mediaSyncLogger from "./logger";
 import PacketType from "../packets";
 import { MessagePort } from "../../common/message_port";
-import { frameAddress } from "../../common/addresses";
 import { ConnectMediaElementMessage, MessageType } from "../../common/messages";
 import { promiseWithTimeout } from "../../common/utils";
 import MediaController from "./controller";
@@ -72,9 +71,7 @@ class MediaSyncClient {
 
 		await this.navigateTo(packet.windowHref);
 
-		const port = MessagePort.connect(
-			frameAddress(this.tabId, packet.frameHref)
-		);
+		const port = MessagePort.connect(this.tabId, packet.frameHref);
 
 		const success = await this.connectElement(port, packet.elementQuery);
 		if (!success) return;

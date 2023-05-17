@@ -1,5 +1,8 @@
+import baseLogger from "./logger";
 import { Message } from "./messages";
 import { EventEmitter } from "./typed_events";
+
+const log = baseLogger.sub("messagePort");
 
 type MessageHandler = (msg: Message) => void;
 
@@ -92,14 +95,16 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 		name: string,
 		handler: (port: MessagePort) => void
 	): void {
+		log.debug(`Message port listener opened on "${name}"`);
 		browser.runtime.onConnect.addListener((port) => {
 			if (port.name !== name) return;
 			handler(new MessagePort(new MessagePortConnectionAdapter(port)));
 		});
 	}
 
-	public static connect(name: string): MessagePort {
-		const port = browser.runtime.connect({ name });
+	public static connect(tabId: number, name: string): MessagePort {
+		log.debug(`Connecting to message port "${name}" on tab ${tabId}...`);
+		const port = browser.tabs.connect(tabId, { name });
 		return new MessagePort(new MessagePortConnectionAdapter(port));
 	}
 }

@@ -67,8 +67,10 @@ class MediaSyncHost {
 			`Connecting to media element at ${this.media.elementQuery} in frame ${this.media.frameHref}`
 		);
 
-		const addr = frameAddress(this.tabId, this.media.frameHref);
-		const port = MessagePort.connect(addr);
+		const port = MessagePort.connect(
+			this.tabId,
+			frameAddress(this.media.frameHref)
+		);
 		this.controller = new MediaController(port);
 	}
 
