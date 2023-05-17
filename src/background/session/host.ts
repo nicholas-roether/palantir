@@ -52,6 +52,7 @@ class HostSessionHandler {
 	public start(): void {
 		this.peer.listen();
 		this.postStatusUpdate();
+		this.syncHost.start();
 		log.info(
 			`Host session on tab ${this.session.tabId} is now listening for connections.`
 		);
