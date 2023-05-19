@@ -46,9 +46,9 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			await this.broadcastReinit();
 		});
 
-		await this.connectToFrame();
+		const success = await this.connectToFrame();
 
-		log.info("Media sync host has started");
+		if (success) log.info("Media sync host has started");
 	}
 
 	public stop(): void {
@@ -66,14 +66,14 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 		this.controller?.handle(packet);
 	}
 
-	private async connectToFrame(): Promise<void> {
+	private async connectToFrame(): Promise<boolean> {
 		const availableMedia = await this.discoverMedia();
 		this.media = this.selectMedia(availableMedia);
 
 		if (!this.media) {
 			log.info("No suitable media elements found in page");
 			this.emit("close", SessionCloseReason.NO_MEDIA);
-			return;
+			return false;
 		}
 
 		log.info(
@@ -85,6 +85,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			frameAddress(this.media.frameHref)
 		);
 		this.controller = new MediaController(port);
+		return true;
 	}
 
 	private async broadcastReinit(): Promise<void> {
@@ -115,9 +116,9 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 	}
 
 	private discoverMedia(): Promise<MediaOption[]> {
-		log.info("Starting media discovery");
-
 		const promise = new Promise<MediaOption[]>((res) => {
+			log.info("Starting media discovery");
+
 			const media: MediaOption[] = [];
 			const listener = messageBus.on("message", (msg) => {
 				if (msg.type != MessageType.MEDIA_FOUND) return;
