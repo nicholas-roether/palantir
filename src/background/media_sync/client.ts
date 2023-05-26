@@ -72,6 +72,7 @@ class MediaSyncClient {
 		await this.navigateTo(packet.windowHref);
 
 		const port = MessagePort.connect(this.tabId, packet.frameHref);
+		if (!port) return;
 
 		const success = await this.connectElement(port, packet.elementQuery);
 		if (!success) return;

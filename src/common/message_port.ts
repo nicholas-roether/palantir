@@ -1,5 +1,5 @@
 import baseLogger from "./logger";
-import { Message } from "./messages";
+import { Message, MessageType } from "./messages";
 import { EventEmitter } from "./event_emitter";
 
 const log = baseLogger.sub("messagePort");
@@ -7,7 +7,7 @@ const log = baseLogger.sub("messagePort");
 type MessageHandler = (msg: Message) => void;
 
 interface MessagePortAdapter {
-	post(message: Message): void;
+	post(message: Message): Promise<void>;
 	listen(listener: MessageHandler): void;
 	onClose(listener: () => void): void;
 	close(): void;
@@ -20,8 +20,8 @@ class MessagePortBusAdapter implements MessagePortAdapter {
 		this.listeners = [];
 	}
 
-	public post(message: Message): void {
-		browser.runtime.sendMessage(message);
+	public async post(message: Message): Promise<void> {
+		await browser.runtime.sendMessage(message);
 	}
 
 	public listen(listener: MessageHandler): void {
@@ -47,12 +47,15 @@ class MessagePortConnectionAdapter implements MessagePortAdapter {
 		this.port = port;
 	}
 
-	public post(message: Message): void {
+	public async post(message: Message): Promise<void> {
 		this.port.postMessage(message);
 	}
 
 	public listen(listener: MessageHandler): void {
-		this.port.onMessage.addListener(listener as (message: object) => void);
+		this.port.onMessage.addListener((msg) => {
+			if (!("type" in msg) || msg.type == MessageType.MSGPORT_SYN) return;
+			listener(msg as Message);
+		});
 	}
 
 	public onClose(listener: () => void): void {
@@ -61,6 +64,32 @@ class MessagePortConnectionAdapter implements MessagePortAdapter {
 
 	public close(): void {
 		this.port.disconnect();
+	}
+}
+
+class MessagePortTabAdapter implements MessagePortAdapter {
+	private readonly tabId: number;
+
+	constructor(tabId: number) {
+		this.tabId = tabId;
+	}
+
+	public async post(message: Message): Promise<void> {
+		await browser.tabs.sendMessage(this.tabId, message);
+	}
+
+	public listen(): void {
+		// Nothing to do
+	}
+
+	public onClose(listener: () => void): void {
+		browser.tabs.onRemoved.addListener((tabId) => {
+			if (tabId == this.tabId) listener();
+		});
+	}
+
+	public close(): void {
+		// Nothing to do
 	}
 }
 
@@ -79,8 +108,13 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 		});
 	}
 
-	public post(message: Message): void {
-		this.adapter.post(message);
+	public async post(message: Message): Promise<void> {
+		try {
+			await this.adapter.post(message);
+		} catch (e) {
+			log.warn("MessagePort disconnected due to post error");
+			this.close();
+		}
 	}
 
 	public close(): void {
@@ -106,10 +140,14 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 		});
 	}
 
-	public static connect(tabId: number, name: string): MessagePort {
+	public static connect(tabId: number, name: string): MessagePort | null {
 		log.debug(`Connecting to message port "${name}" on tab ${tabId}...`);
 		const port = browser.tabs.connect(tabId, { name });
 		return new MessagePort(new MessagePortConnectionAdapter(port));
+	}
+
+	public static tab(tabId: number): MessagePort | null {
+		return new MessagePort(new MessagePortTabAdapter(tabId));
 	}
 }
 

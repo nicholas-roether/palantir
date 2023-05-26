@@ -96,6 +96,8 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			this.tabId,
 			frameAddress(this.media.frameHref)
 		);
+		if (!port) return false;
+
 		this.controller = new MediaController(port);
 		return true;
 	}
@@ -147,7 +149,11 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 				res(media);
 			}, DISCOVERY_TIMEOUT);
 		});
-		browser.tabs.sendMessage(this.tabId, new DiscoverMediaMessage());
+
+		const tabPort = MessagePort.tab(this.tabId);
+		if (!tabPort) return Promise.resolve([]);
+
+		tabPort.post(new DiscoverMediaMessage());
 		return promise;
 	}
 
