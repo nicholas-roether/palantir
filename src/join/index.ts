@@ -9,7 +9,7 @@ const joinActionSchema = ty.object({
 	accessToken: ty.string()
 });
 
-async function handleAction(msg: Record<string, unknown>): void {
+async function handleAction(msg: Record<string, unknown>): Promise<void> {
 	if (!checkType(joinActionSchema, msg)) return;
 	const tab = await browser.tabs.getCurrent();
 	if (!tab || !tab.id) return;
