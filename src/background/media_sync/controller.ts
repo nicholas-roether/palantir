@@ -6,7 +6,7 @@ import {
 	MessageType,
 	RequestMediaHeartbeatMessage
 } from "../../common/messages";
-import { EventEmitter } from "../../common/typed_events";
+import { EventEmitter } from "../../common/event_emitter";
 import mediaSyncLogger from "./logger";
 import { Packet } from "../p2p";
 import PacketType from "../packets";

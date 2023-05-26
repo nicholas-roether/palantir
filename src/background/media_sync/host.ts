@@ -5,7 +5,7 @@ import {
 	MessageType,
 	SessionCloseReason
 } from "../../common/messages";
-import { EventEmitter } from "../../common/typed_events";
+import { EventEmitter } from "../../common/event_emitter";
 import { Connection, Packet } from "../p2p";
 import { PacketBusSubscription } from "../packet_bus";
 import PacketType from "../packets";

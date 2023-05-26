@@ -5,7 +5,7 @@ import {
 	SessionStatusUpdateMessage,
 	UserRole
 } from "../../common/messages";
-import { EventEmitter } from "../../common/typed_events";
+import { EventEmitter } from "../../common/event_emitter";
 import sessionLogger from "./logger";
 import { MessagePort } from "../../common/message_port";
 

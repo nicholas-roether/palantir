@@ -2,7 +2,7 @@ import * as peerjs from "peerjs";
 import ty, { ValidatedBy, checkType } from "lifeboat";
 import { promiseWithTimeout } from "../common/utils";
 import backgroundLogger from "./logger";
-import { EventEmitter } from "../common/typed_events";
+import { EventEmitter } from "../common/event_emitter";
 
 const p2pLogger = backgroundLogger.sub("p2p");
 

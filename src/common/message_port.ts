@@ -1,6 +1,6 @@
 import baseLogger from "./logger";
 import { Message } from "./messages";
-import { EventEmitter } from "./typed_events";
+import { EventEmitter } from "./event_emitter";
 
 const log = baseLogger.sub("messagePort");
 

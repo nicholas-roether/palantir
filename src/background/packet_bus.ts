@@ -1,4 +1,4 @@
-import { EventEmitter } from "../common/typed_events";
+import { EventEmitter } from "../common/event_emitter";
 import { Packet } from "./p2p";
 
 interface PacketBusEvent {
