@@ -6,8 +6,8 @@ import {
 	UserRole
 } from "../../common/messages";
 import { EventEmitter } from "../../common/typed_events";
-import { messageBus } from "../../common/message_port";
 import sessionLogger from "./logger";
+import { MessagePort } from "../../common/message_port";
 
 const sessionUpdatePacketSchema = ty.object({
 	users: ty.array(
@@ -47,7 +47,7 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 	}
 
 	public broadcastStatus(): void {
-		messageBus.post(
+		MessagePort.bus.post(
 			new SessionStatusUpdateMessage(this.tabId, this.status)
 		);
 	}

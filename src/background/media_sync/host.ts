@@ -1,5 +1,5 @@
 import { frameAddress } from "../../common/addresses";
-import { MessagePort, messageBus } from "../../common/message_port";
+import { MessagePort } from "../../common/message_port";
 import {
 	DiscoverMediaMessage,
 	MessageType,
@@ -120,7 +120,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			log.info("Starting media discovery");
 
 			const media: MediaOption[] = [];
-			const listener = messageBus.on("message", (msg) => {
+			const listener = MessagePort.bus.on("message", (msg) => {
 				if (msg.type != MessageType.MEDIA_FOUND) return;
 				media.push({
 					media: {
@@ -131,7 +131,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 				});
 			});
 			setTimeout(() => {
-				messageBus.removeListener(listener);
+				MessagePort.bus.removeListener(listener);
 				res(media);
 			}, DISCOVERY_TIMEOUT);
 		});

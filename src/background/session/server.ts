@@ -1,4 +1,3 @@
-import { messageBus } from "../../common/message_port";
 import {
 	CloseSessionMessage,
 	CreateHostSessionMessage,
@@ -12,6 +11,7 @@ import { describeSessionCloseReason } from "../../common/enum_descriptions";
 import { Session, sessionLogger } from ".";
 import { ClientSessionHandler } from "./client";
 import { HostSessionHandler } from "./host";
+import { MessagePort } from "../../common/message_port";
 
 const log = sessionLogger.sub("server");
 
@@ -23,7 +23,7 @@ class SessionServer {
 	}
 
 	public start(): void {
-		messageBus.on("message", (msg) => this.onMessage(msg));
+		MessagePort.bus.on("message", (msg) => this.onMessage(msg));
 	}
 
 	private async onMessage(msg: Message): Promise<void> {

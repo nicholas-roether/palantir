@@ -65,6 +65,7 @@ class MessagePortConnectionAdapter implements MessagePortAdapter {
 }
 
 class MessagePort extends EventEmitter<{ message: Message; close: void }> {
+	private static messageBus: MessagePort | null = null;
 	private readonly adapter: MessagePortAdapter;
 
 	private constructor(adapter: MessagePortAdapter) {
@@ -87,8 +88,11 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 		this.emit("close", undefined);
 	}
 
-	public static bus(): MessagePort {
-		return new MessagePort(new MessagePortBusAdapter());
+	public static get bus(): MessagePort {
+		if (!this.messageBus) {
+			this.messageBus = new MessagePort(new MessagePortBusAdapter());
+		}
+		return this.messageBus;
 	}
 
 	public static listen(
@@ -109,6 +113,4 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 	}
 }
 
-const messageBus = MessagePort.bus();
-
-export { MessagePort, MessageHandler, messageBus };
+export { MessagePort, MessageHandler };

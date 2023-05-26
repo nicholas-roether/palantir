@@ -1,4 +1,4 @@
-import { messageBus } from "../common/message_port";
+import { MessagePort } from "../common/message_port";
 import { MediaFoundMessage } from "../common/messages";
 import frameLogger from "./logger";
 import { getQueryFor } from "./query";
@@ -33,7 +33,7 @@ function discoverMedia(): void {
 		log.debug(
 			`Found a sync candiate at ${media.query} (score ${media.score}) in frame ${location.href}`
 		);
-		messageBus.post(
+		MessagePort.bus.post(
 			new MediaFoundMessage(location.href, media.query, media.score)
 		);
 	}

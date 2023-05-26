@@ -1,5 +1,5 @@
 import { frameAddress } from "../common/addresses";
-import { MessagePort, messageBus } from "../common/message_port";
+import { MessagePort } from "../common/message_port";
 import {
 	MediaElementConnectionResultMessage,
 	Message,
@@ -35,6 +35,6 @@ async function handlePort(port: MessagePort): Promise<void> {
 	port.post(new MediaElementConnectionResultMessage(true));
 }
 
-messageBus.on("message", onBusMessage);
+MessagePort.bus.on("message", onBusMessage);
 
 MessagePort.listen(frameAddress(location.href), handlePort);
