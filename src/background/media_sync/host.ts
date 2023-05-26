@@ -31,6 +31,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 	private readonly subscription: PacketBusSubscription;
 	private media: Media | null = null;
 	private controller: MediaController | null = null;
+	private running = false;
 
 	constructor(tabId: number, subscription: PacketBusSubscription) {
 		super();
@@ -38,20 +39,30 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 		this.tabId = tabId;
 		this.subscription = subscription;
 		this.subscription.on("packet", (packet) => this.onPacket(packet));
+
+		browser.tabs.onUpdated.addListener(
+			async () => {
+				if (!this.running) return;
+
+				const success = await this.connectToFrame();
+				if (success) await this.broadcastReinit();
+			},
+			{
+				tabId: this.tabId,
+				properties: ["url"]
+			}
+		);
 	}
 
 	public async start(): Promise<void> {
-		browser.tabs.onUpdated.addListener(async () => {
-			await this.connectToFrame();
-			await this.broadcastReinit();
-		});
-
+		this.running = true;
 		const success = await this.connectToFrame();
 
 		if (success) log.info("Media sync host has started");
 	}
 
 	public stop(): void {
+		this.running = false;
 		this.subscription.cancel();
 
 		log.info("Media sync host has stopped");
@@ -72,6 +83,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 
 		if (!this.media) {
 			log.info("No suitable media elements found in page");
+			this.stop();
 			this.emit("close", SessionCloseReason.NO_MEDIA);
 			return false;
 		}
