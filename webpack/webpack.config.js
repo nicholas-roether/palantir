@@ -14,8 +14,8 @@ module.exports = (env) => ({
 	devtool: env.production ? undefined : "source-map",
 	entry: {
 		popup: path.join(src, "popup"),
-		window: path.join(src, "window"),
-		frames: path.join(src, "frames"),
+		join: path.join(src, "join"),
+		content: path.join(src, "content"),
 		background: path.join(src, "background"),
 		options: path.join(src, "options")
 	},
@@ -24,7 +24,7 @@ module.exports = (env) => ({
 		clean: true
 	},
 	resolve: {
-		extensions: [".ts", ".js", ".tsx", ".jsx", ".glsl", ".wasm"]
+		extensions: [".ts", ".js", ".tsx", ".jsx"]
 	},
 	module: {
 		rules: [

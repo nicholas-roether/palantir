@@ -1,5 +1,5 @@
 import baseLogger from "./logger";
-import { Message, MessageType } from "./messages";
+import { Message } from "./messages";
 import { EventEmitter } from "./event_emitter";
 
 const log = baseLogger.sub("messagePort");
@@ -53,7 +53,7 @@ class MessagePortConnectionAdapter implements MessagePortAdapter {
 
 	public listen(listener: MessageHandler): void {
 		this.port.onMessage.addListener((msg) => {
-			if (!("type" in msg) || msg.type == MessageType.MSGPORT_SYN) return;
+			if (!("type" in msg)) return;
 			listener(msg as Message);
 		});
 	}

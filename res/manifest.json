@@ -23,12 +23,12 @@
             "all_frames": true,
             "js": [
                 "browser-polyfill.js",
-                "frames.js"
+                "content.js"
             ]
         },
         {
-            "matches": ["<all_urls>"],
-            "js": ["window.js"]
+            "matches": ["https://palantir.niko-roether.dev/join/*"],
+            "js": ["join.js"]
         }
     ],
     "background": {
