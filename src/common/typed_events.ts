@@ -5,7 +5,7 @@ type EventHandler<E> = (event: E) => unknown;
 class EventEmitter<M> {
 	private readonly target: EventTarget;
 	private readonly listeners: IdentifierMap<
-		[type: string, handler: EventHandler<Event>]
+		[type: string, handler: EventHandler<unknown>]
 	>;
 
 	constructor() {
@@ -17,12 +17,7 @@ class EventEmitter<M> {
 		type: T,
 		handler: EventHandler<M[T]>
 	): number {
-		const listener = (evt: Event): void => {
-			if (!("detail" in evt)) return;
-			handler(evt.detail as M[T]);
-		};
-		this.target.addEventListener(type, listener);
-		return this.listeners.add([type, listener]);
+		return this.listeners.add([type, handler as EventHandler<unknown>]);
 	}
 
 	public once<T extends keyof M & string>(type: T): Promise<M[T]> {
@@ -35,14 +30,17 @@ class EventEmitter<M> {
 	}
 
 	protected emit<T extends keyof M & string>(type: T, event: M[T]): void {
-		this.target.dispatchEvent(new CustomEvent(type, { detail: event }));
+		for (const [evtName, listener] of this.listeners) {
+			if (evtName != type) continue;
+			listener(event);
+		}
 	}
 
 	public removeListener(identifier: number): void {
 		const entry = this.listeners.take(identifier);
 		if (!entry) return;
-		const [type, listener] = entry;
-		this.target.removeEventListener(type, listener);
+		const [target, handler] = entry;
+		this.target.removeEventListener(target, handler);
 	}
 }
 
