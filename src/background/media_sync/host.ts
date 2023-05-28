@@ -134,14 +134,14 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			log.info("Starting media discovery");
 
 			const media: MediaOption[] = [];
-			const listener = MessagePort.bus.on("message", (msg) => {
-				if (msg.type != MessageType.MEDIA_FOUND) return;
+			const listener = MessagePort.bus.on("message", ({ message }) => {
+				if (message.type != MessageType.MEDIA_FOUND) return;
 				media.push({
 					media: {
-						frameHref: msg.frameHref,
-						elementQuery: msg.elementQuery
+						frameHref: message.frameHref,
+						elementQuery: message.elementQuery
 					},
-					score: msg.score
+					score: message.score
 				});
 			});
 			setTimeout(() => {

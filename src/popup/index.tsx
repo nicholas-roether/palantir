@@ -33,7 +33,6 @@ async function createClientSession(
 ): Promise<void> {
 	await browser.runtime.sendMessage(
 		new CreateClientSessionMessage(
-			await getCurrentTab(),
 			"Test User",
 			hostId,
 			accessToken

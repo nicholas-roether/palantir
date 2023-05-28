@@ -11,7 +11,11 @@ import { describeSessionCloseReason } from "../../common/enum_descriptions";
 import { Session, sessionLogger } from ".";
 import { ClientSessionHandler } from "./client";
 import { HostSessionHandler } from "./host";
-import { MessagePort } from "../../common/message_port";
+import {
+	MessagePort,
+	MessageSender,
+	MessageSenderType
+} from "../../common/message_port";
 
 const log = sessionLogger.sub("server");
 
@@ -24,13 +28,18 @@ class SessionServer {
 
 	public start(): void {
 		log.debug("Session server started.");
-		MessagePort.bus.on("message", (msg) => this.onMessage(msg));
+		MessagePort.bus.on("message", ({ message, sender }) =>
+			this.onMessage(message, sender)
+		);
 	}
 
-	private async onMessage(msg: Message): Promise<void> {
+	private async onMessage(
+		msg: Message,
+		sender: MessageSender
+	): Promise<void> {
 		switch (msg.type) {
 			case MessageType.CREATE_CLIENT_SESSION:
-				await this.createClientSession(msg);
+				await this.createClientSession(msg, sender);
 				break;
 			case MessageType.CREATE_HOST_SESSION:
 				await this.createHostSession(msg);
@@ -43,18 +52,28 @@ class SessionServer {
 		}
 	}
 
-	private async createClientSession({
-		tabId,
-		hostId,
-		username,
-		accessToken
-	}: CreateClientSessionMessage): Promise<void> {
+	private async createClientSession(
+		{ hostId, username, accessToken }: CreateClientSessionMessage,
+		sender: MessageSender
+	): Promise<void> {
+		if (sender.type != MessageSenderType.TAB) {
+			log.error(
+				"Received CREATE_CLIENT_SESSION from unexpected source; client sessions can only be created from tabs"
+			);
+			return;
+		}
+
+		if (!sender.tab.id) {
+			log.error("Cannot create a client session on a tab without an id");
+			return;
+		}
+
 		log.info(
-			`Starting client session with username "${username}" on tab ${tabId}...`
+			`Starting client session with username "${username}" on tab ${sender.tab.id}...`
 		);
 
 		const sessionHandler = new ClientSessionHandler(
-			await this.createSession(tabId),
+			await this.createSession(sender.tab.id),
 			username,
 			hostId,
 			accessToken
@@ -64,8 +83,8 @@ class SessionServer {
 	}
 
 	private async createHostSession({
-		tabId,
-		username
+		username,
+		tabId
 	}: CreateHostSessionMessage): Promise<void> {
 		log.info(
 			`Starting host session with username "${username}" on tab ${tabId}...`

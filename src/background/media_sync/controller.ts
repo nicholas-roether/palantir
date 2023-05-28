@@ -29,8 +29,8 @@ class MediaController extends EventEmitter<{
 	constructor(port: MessagePort) {
 		super();
 		this.port = port;
-		this.messageListener = this.port.on("message", (msg) =>
-			this.onMessage(msg)
+		this.messageListener = this.port.on("message", ({ message }) =>
+			this.onMessage(message)
 		);
 		this.port.on("close", () => this.emit("disconnect", undefined));
 	}

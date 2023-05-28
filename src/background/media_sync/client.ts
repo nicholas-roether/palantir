@@ -108,11 +108,13 @@ class MediaSyncClient {
 			log.error("Frame response timed out");
 			return false;
 		}
-		if (response.type != MessageType.MEDIA_ELEMENT_CONNECTION_RESULT) {
+
+		const { message } = response;
+		if (message.type != MessageType.MEDIA_ELEMENT_CONNECTION_RESULT) {
 			log.error("Received invalid response from frame");
 			return false;
 		}
-		if (!response.connected) {
+		if (!message.connected) {
 			log.error("Connection with media element failed");
 			return false;
 		}

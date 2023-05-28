@@ -21,12 +21,8 @@ async function handleAction(msg: Record<string, unknown>): Promise<void> {
 		return;
 	}
 
-
-	const tab = await browser.tabs.getCurrent();
-	if (!tab || !tab.id) return;
 	MessagePort.bus.post(
 		new CreateClientSessionMessage(
-			tab.id,
 			msg.username,
 			msg.hostId,
 			msg.accessToken

@@ -15,7 +15,7 @@ class MediaElementController {
 	}
 
 	public start(): void {
-		this.port.on("message", (msg) => this.onMessage(msg));
+		this.port.on("message", ({ message }) => this.onMessage(message));
 		this.element.addEventListener("play", () => this.sendUpdate());
 		this.element.addEventListener("pause", () => this.sendUpdate());
 		this.element.addEventListener("seeked", () => this.sendUpdate());
@@ -39,7 +39,7 @@ class MediaElementController {
 		const adjustedTime = this.getAdjustedTime(message);
 		message.playing
 			? await this.element.play()
-			: await this.element.pause();
+			: this.element.pause();
 		this.setTime(adjustedTime);
 	}
 

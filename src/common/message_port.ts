@@ -4,7 +4,32 @@ import { EventEmitter } from "./event_emitter";
 
 const log = baseLogger.sub("messagePort");
 
-type MessageHandler = (msg: Message) => void;
+const enum MessageSenderType {
+	TAB,
+	PORT,
+	UNKNOWN
+}
+
+type MessageSender =
+	| { type: MessageSenderType.TAB; tab: browser.tabs.Tab }
+	| { type: MessageSenderType.PORT }
+	| { type: MessageSenderType.UNKNOWN };
+
+type MessageHandler = (msg: Message, sender: MessageSender) => void;
+
+function mapMessageSender(
+	nativeSender: browser.runtime.MessageSender
+): MessageSender {
+	if (nativeSender.tab) {
+		return { type: MessageSenderType.TAB, tab: nativeSender.tab };
+	}
+	return { type: MessageSenderType.UNKNOWN };
+}
+
+type NativeMessageHandler = (
+	msg: Message,
+	sender: browser.runtime.MessageSender
+) => void;
 
 interface MessagePortAdapter {
 	post(message: Message): Promise<void>;
@@ -14,7 +39,7 @@ interface MessagePortAdapter {
 }
 
 class MessagePortBusAdapter implements MessagePortAdapter {
-	private readonly listeners: MessageHandler[];
+	private readonly listeners: NativeMessageHandler[];
 
 	constructor() {
 		this.listeners = [];
@@ -25,8 +50,12 @@ class MessagePortBusAdapter implements MessagePortAdapter {
 	}
 
 	public listen(listener: MessageHandler): void {
-		this.listeners.push(listener);
-		browser.runtime.onMessage.addListener(listener);
+		const handler = (
+			msg: Message,
+			sender: browser.runtime.MessageSender
+		): void => listener(msg, mapMessageSender(sender));
+		this.listeners.push(handler);
+		browser.runtime.onMessage.addListener(handler);
 	}
 
 	public onClose(): void {
@@ -54,7 +83,7 @@ class MessagePortConnectionAdapter implements MessagePortAdapter {
 	public listen(listener: MessageHandler): void {
 		this.port.onMessage.addListener((msg) => {
 			if (!("type" in msg)) return;
-			listener(msg as Message);
+			listener(msg as Message, { type: MessageSenderType.PORT });
 		});
 	}
 
@@ -93,15 +122,23 @@ class MessagePortTabAdapter implements MessagePortAdapter {
 	}
 }
 
-class MessagePort extends EventEmitter<{ message: Message; close: void }> {
+interface MessagePortMessageEvent {
+	message: Message;
+	sender: MessageSender;
+}
+
+class MessagePort extends EventEmitter<{
+	message: MessagePortMessageEvent;
+	close: void;
+}> {
 	private static messageBus: MessagePort | null = null;
 	private readonly adapter: MessagePortAdapter;
 
 	private constructor(adapter: MessagePortAdapter) {
 		super();
 		this.adapter = adapter;
-		this.adapter.listen((msg) => {
-			this.emit("message", msg);
+		this.adapter.listen((message, sender) => {
+			this.emit("message", { message, sender });
 		});
 		this.adapter.onClose(() => {
 			this.emit("close", undefined);
@@ -151,4 +188,10 @@ class MessagePort extends EventEmitter<{ message: Message; close: void }> {
 	}
 }
 
-export { MessagePort, MessageHandler };
+export {
+	MessagePort,
+	MessageHandler,
+	MessageSender,
+	MessageSenderType,
+	MessagePortMessageEvent
+};

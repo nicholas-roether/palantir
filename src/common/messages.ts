@@ -26,18 +26,11 @@ class CreateHostSessionMessage {
 
 class CreateClientSessionMessage {
 	public readonly type = MessageType.CREATE_CLIENT_SESSION;
-	public readonly tabId: number;
 	public readonly username: string;
 	public readonly hostId: string;
 	public readonly accessToken: string;
 
-	constructor(
-		tabId: number,
-		username: string,
-		hostId: string,
-		accessToken: string
-	) {
-		this.tabId = tabId;
+	constructor(username: string, hostId: string, accessToken: string) {
 		this.username = username;
 		this.hostId = hostId;
 		this.accessToken = accessToken;
