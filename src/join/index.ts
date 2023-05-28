@@ -15,7 +15,13 @@ const joinActionSchema = ty.object({
 });
 
 async function handleAction(msg: Record<string, unknown>): Promise<void> {
-	if (!checkType(joinActionSchema, msg)) return;
+	log.debug(`Got message ${JSON.stringify(msg)}`);
+	if (!checkType(joinActionSchema, msg)) {
+		log.error(`Message received was invalid: ${joinActionSchema.reason}`);
+		return;
+	}
+
+
 	const tab = await browser.tabs.getCurrent();
 	if (!tab || !tab.id) return;
 	MessagePort.bus.post(
