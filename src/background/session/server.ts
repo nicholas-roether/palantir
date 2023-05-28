@@ -23,6 +23,7 @@ class SessionServer {
 	}
 
 	public start(): void {
+		log.debug("Session server started.");
 		MessagePort.bus.on("message", (msg) => this.onMessage(msg));
 	}
 
