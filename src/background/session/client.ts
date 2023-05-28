@@ -11,17 +11,19 @@ import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import { Session } from "./server";
 import { sessionLogger, sessionUpdatePacketSchema } from ".";
+import MediaSyncClient from "../media_sync/client";
 
 const log = sessionLogger.sub("client");
 
 class ClientSessionHandler {
 	private static readonly CONNECTION_TIMEOUT = 5000; // ms
-
+	
 	private readonly session: Session;
 	private readonly peer: Peer;
 	private readonly username: string;
 	private readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
+	private readonly syncClient: MediaSyncClient | null = null;
 
 	private connectionState = ConnectionState.CONNECTING;
 	private users: User[];
@@ -57,6 +59,7 @@ class ClientSessionHandler {
 
 	public stop(): void {
 		this.connectionState = ConnectionState.DISCONNECTED;
+		this.syncClient?.stop();
 		this.peer.close();
 	}
 
@@ -94,6 +97,9 @@ class ClientSessionHandler {
 		});
 
 		connection.on("packet", (packet) => this.onPacket(packet));
+
+		this.syncClient = new MediaSyncClient(connection, this.session.tabId);
+		this.syncClient.start();
 	}
 
 	private onPacket(packet: Packet): void {
