@@ -29,7 +29,7 @@ function mapMessageSender(
 type NativeMessageHandler = (
 	msg: Message,
 	sender: browser.runtime.MessageSender
-) => void;
+) => boolean;
 
 interface MessagePortAdapter {
 	post(message: Message): Promise<void>;
@@ -50,10 +50,10 @@ class MessagePortBusAdapter implements MessagePortAdapter {
 	}
 
 	public listen(listener: MessageHandler): void {
-		const handler = (
-			msg: Message,
-			sender: browser.runtime.MessageSender
-		): void => listener(msg, mapMessageSender(sender));
+		const handler: NativeMessageHandler = (msg, sender) => {
+			listener(msg, mapMessageSender(sender));
+			return false;
+		};
 		this.listeners.push(handler);
 		browser.runtime.onMessage.addListener(handler);
 	}
@@ -149,8 +149,7 @@ class MessagePort extends EventEmitter<{
 		try {
 			await this.adapter.post(message);
 		} catch (e) {
-			log.warn("MessagePort disconnected due to post error");
-			this.close();
+			log.warn(`MessagePort encountered error while posting message: ${e}`);
 		}
 	}
 
