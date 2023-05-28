@@ -27,8 +27,12 @@
             ]
         },
         {
-            "matches": ["https://palantir.niko-roether.dev/join/*"],
-            "js": ["join.js"]
+            "matches": [
+							"https://palantir.niko-roether.dev/join/*",
+							"http://localhost/join/*"
+						],
+            "js": ["join.js"],
+						"run_at": "document_start"
         }
     ],
     "background": {

@@ -1,6 +1,11 @@
 import ty, { checkType } from "lifeboat";
 import { MessagePort } from "../common/message_port";
 import { CreateClientSessionMessage } from "../common/messages";
+import baseLogger from "../common/logger";
+
+const log = baseLogger.sub("join");
+
+log.debug("Join link detected; palantir is correctly installed!");
 
 const joinActionSchema = ty.object({
 	action: ty.equals("join" as const),
@@ -28,4 +33,4 @@ window.addEventListener("message", (evt) => {
 	handleAction(evt.data);
 });
 
-(window as unknown as Record<string, unknown>).__palantirExtensionPresent = true;
+document.documentElement.setAttribute("data-palantir-extension-installed", "");
