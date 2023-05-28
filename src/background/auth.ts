@@ -94,7 +94,7 @@ class ClientSessionAuth {
 			`Attempting to authenticate to host ${connection.remoteId}...`
 		);
 
-		await connection.send({
+		connection.send({
 			type: PacketType.AUTH_TOKEN,
 			token: this.accessToken,
 			username: this.username
