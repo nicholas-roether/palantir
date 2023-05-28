@@ -27,3 +27,5 @@ window.addEventListener("message", (evt) => {
 	if (evt.data.__channel != "palantir") return;
 	handleAction(evt.data);
 });
+
+(window as unknown as Record<string, unknown>).__palantirExtensionPresent = true;
