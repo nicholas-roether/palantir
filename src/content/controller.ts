@@ -2,12 +2,16 @@ import { MessagePort } from "../common/message_port";
 import { MessageType } from "../common/messages";
 import { Message } from "../common/messages";
 import { MediaSyncMessage } from "../common/messages";
+import frameLogger from "./logger";
+
+const log = frameLogger.sub("controller");
 
 const HEARTBEAT_RATE = 1000; // ms
 
 class MediaElementController {
 	private readonly port: MessagePort;
 	private readonly element: HTMLMediaElement;
+	private running = false;
 
 	constructor(port: MessagePort, element: HTMLMediaElement) {
 		this.port = port;
@@ -19,9 +23,20 @@ class MediaElementController {
 		this.element.addEventListener("play", () => this.sendUpdate());
 		this.element.addEventListener("pause", () => this.sendUpdate());
 		this.element.addEventListener("seeked", () => this.sendUpdate());
+		this.running = true;
+
+		log.info("Media controller started");
+	}
+
+	public stop(): void {
+		this.running = false;
+
+		log.info("Media controller stopped");
 	}
 
 	private startHeartbeat(): void {
+		log.info("Starting media heartbeat...");
+
 		setInterval(() => this.sendUpdate(), HEARTBEAT_RATE);
 	}
 
@@ -36,14 +51,17 @@ class MediaElementController {
 	}
 
 	private async onSyncMessage(message: MediaSyncMessage): Promise<void> {
+		log.debug(`Received sync message: ${JSON.stringify(message)}`);
+
 		const adjustedTime = this.getAdjustedTime(message);
-		message.playing
-			? await this.element.play()
-			: this.element.pause();
+		message.playing ? await this.element.play() : this.element.pause();
 		this.setTime(adjustedTime);
 	}
 
 	private sendUpdate(): void {
+		if (!this.running) return;
+
+		log.debug("Playback state updated");
 		this.port.post(
 			new MediaSyncMessage(
 				!this.element.paused,

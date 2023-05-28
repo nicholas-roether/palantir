@@ -1,8 +1,10 @@
 import { frameAddress } from "../../common/addresses";
 import { MessagePort } from "../../common/message_port";
 import {
+    ConnectMediaElementMessage,
 	DiscoverMediaMessage,
 	MessageType,
+	RequestMediaHeartbeatMessage,
 	SessionCloseReason
 } from "../../common/messages";
 import { EventEmitter } from "../../common/event_emitter";
@@ -64,6 +66,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 	public stop(): void {
 		this.running = false;
 		this.subscription.cancel();
+		this.controller?.stop();
 
 		log.info("Media sync host has stopped");
 	}
@@ -97,6 +100,9 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 			frameAddress(this.media.frameHref)
 		);
 		if (!port) return false;
+
+		port.post(new ConnectMediaElementMessage(this.media.elementQuery));
+		port.post(new RequestMediaHeartbeatMessage());
 
 		this.controller = new MediaController(port);
 		return true;

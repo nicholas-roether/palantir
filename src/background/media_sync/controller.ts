@@ -51,6 +51,7 @@ class MediaController extends EventEmitter<{
 
 	public stop(): void {
 		this.port.removeListener(this.messageListener);
+		this.port.close();
 	}
 
 	public requestHeartbeat(): void {
