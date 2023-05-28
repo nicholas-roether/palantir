@@ -41,12 +41,8 @@ module.exports = (env) => ({
 				},
 			},
 			{
-				test: /\.glsl$/,
-				type: "asset/source"
-			},
-			{
-				test: /\.wasm$/,
-				type: "webassembly/async"
+				test: /\.css$/,
+				use: ["style-loader", "css-loader"]
 			}
 		]
 	},

@@ -128,6 +128,7 @@ class HostSessionHandler {
 		this.session.postStatusUpdate({
 			type: SessionType.HOST,
 			hostId: await this.getId(),
+			username: this.username,
 			accessToken: this.accessToken,
 			connectionState: ConnectionState.CONNECTED,
 			users: this.getUsers()

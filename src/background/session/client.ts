@@ -23,7 +23,7 @@ class ClientSessionHandler {
 	private readonly username: string;
 	private readonly hostId: string;
 	private readonly auth: ClientSessionAuth;
-	private readonly syncClient: MediaSyncClient | null = null;
+	private syncClient: MediaSyncClient | null = null;
 
 	private connectionState = ConnectionState.CONNECTING;
 	private users: User[];
@@ -122,6 +122,7 @@ class ClientSessionHandler {
 		this.session.postStatusUpdate({
 			type: SessionType.CLIENT,
 			hostId: this.hostId,
+			username: this.username,
 			accessToken: this.auth.accessToken,
 			connectionState: this.connectionState,
 			users: this.users

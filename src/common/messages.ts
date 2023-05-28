@@ -81,6 +81,7 @@ interface User {
 interface SessionStatus {
 	type: SessionType;
 	hostId: string;
+	username: string;
 	accessToken: string;
 	connectionState: ConnectionState;
 	users: User[];
