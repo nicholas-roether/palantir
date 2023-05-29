@@ -8,20 +8,23 @@ interface SessionDisplayProps {
 	status: SessionStatus;
 }
 
-function SessionDisplay({ status }: SessionDisplayProps): JSX.Element {
-	const inviteLink = createInviteLink(status.username, status.hostId);
+function SessionDisplay(props: SessionDisplayProps): JSX.Element {
+	const inviteLink = (): string =>
+		createInviteLink(props.status.username, props.status.hostId);
 
 	return (
 		<>
-			<Show when={status.type == SessionType.HOST}>
+			<Show when={props.status.type == SessionType.HOST}>
 				<Paragraph>
 					Currently <b>hosting</b> a session.
 				</Paragraph>
 			</Show>
-			<Show when={status.type == SessionType.CLIENT}>
+			<Show when={props.status.type == SessionType.CLIENT}>
 				<Paragraph>Currently in a session.</Paragraph>
 			</Show>
-			<CopyLinkButton href={inviteLink}>Copy invite link</CopyLinkButton>
+			<CopyLinkButton href={inviteLink()}>
+				Copy invite link
+			</CopyLinkButton>
 		</>
 	);
 }
