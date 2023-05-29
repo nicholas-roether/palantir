@@ -30,7 +30,7 @@ function Popup(): JSX.Element {
 					<SessionCreationForm />
 				</Show>
 				<Show when={session() != null}>
-					<SessionDisplay status={session() as SessionStatus} />
+					<SessionDisplay status={session()!} />
 				</Show>
 			</div>
 		</div>
