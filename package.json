@@ -37,7 +37,7 @@
   "dependencies": {
     "@emotion/css": "^11.11.0",
     "@nicholas-roether/palantir-ui": "^2.2.1",
-    "@nicholas-roether/palantir-ui-solid": "^2.2.3",
+    "@nicholas-roether/palantir-ui-solid": "^2.2.4",
     "base64-arraybuffer": "^1.0.2",
     "fast-simplex-noise": "^4.0.0",
     "lifeboat": "^1.3.3",
