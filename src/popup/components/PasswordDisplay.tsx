@@ -1,5 +1,5 @@
 import { JSX, Show, createSignal } from "solid-js";
-import { Card } from "@nicholas-roether/palantir-ui-solid";
+import { css } from "@emotion/css";
 
 interface PasswordDisplayProps {
 	password: string;
@@ -14,16 +14,45 @@ function displayPassword(password: string, visible: boolean): string {
 	return createPasswordMask(password.length);
 }
 
+const passwordDisplay = css`
+	display: flex;
+`;
+
+const passwordText = css`
+	flex: 1;
+	border: 3px transparent solid;
+	background-color: var(--pui-color-background);
+`;
+
+const passwordVisibleButton = css`
+	width: 3em;
+	border: none;
+	background-color: transparent;
+`;
+
 function PasswordDisplay(props: PasswordDisplayProps): JSX.Element {
-	const [visible, setVisible] = createSignal(true);
+	const [visible, setVisible] = createSignal(false);
 
 	const pwdDisplay = (): string => displayPassword(props.password, visible());
+	const buttonLabel = (): string =>
+		visible() ? "Hide password" : "Show password";
 
 	return (
-		<Card onClick={() => setVisible((visible) => !visible)}>
-			{pwdDisplay()} <Show when={visible()}>(click to hide)</Show>
-			<Show when={!visible()}>(click to show)</Show>
-		</Card>
+		<div classList={{ "pui-surface": true, [passwordDisplay]: true }}>
+			<span class={passwordText}>{pwdDisplay()}</span>
+			<button
+				class={passwordVisibleButton}
+				onClick={() => setVisible((visible) => !visible)}
+				aria-label={buttonLabel()}
+			>
+				<Show when={visible()}>
+					{/* TODO */}
+				</Show>
+				<Show when={!visible()}>
+					{/* TODO */}
+				</Show>
+			</button>
+		</div>
 	);
 }
 
