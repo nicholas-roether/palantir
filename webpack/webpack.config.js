@@ -38,6 +38,9 @@ module.exports = (env) => ({
 						"@babel/preset-env",
 						"@babel/preset-typescript",
 						"solid"
+					],
+					plugins: [
+						"@emotion"
 					]
 				},
 			},

@@ -15,6 +15,7 @@
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
     "@babel/preset-typescript": "^7.21.4",
+    "@emotion/babel-plugin": "^11.11.0",
     "@iconify-json/game-icons": "^1.1.2",
     "@svgr/core": "^8.0.0",
     "@svgr/plugin-jsx": "^8.0.1",

@@ -5070,6 +5070,7 @@ __metadata:
     "@babel/core": ^7.21.4
     "@babel/preset-env": ^7.21.4
     "@babel/preset-typescript": ^7.21.4
+    "@emotion/babel-plugin": ^11.11.0
     "@emotion/css": ^11.11.0
     "@iconify-json/game-icons": ^1.1.2
     "@nicholas-roether/palantir-ui": ^2.2.1
