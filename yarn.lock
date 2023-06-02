@@ -1565,14 +1565,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nicholas-roether/palantir-ui-solid@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "@nicholas-roether/palantir-ui-solid@npm:2.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui-solid%2F2.2.4%2Fcdc0d41ab94851a270acd5a69d62bab6efed36e6"
-  dependencies:
-    solid-js: ^1.7.5
+"@nicholas-roether/palantir-ui-solid@npm:^2.2.7":
+  version: 2.2.7
+  resolution: "@nicholas-roether/palantir-ui-solid@npm:2.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui-solid%2F2.2.7%2F49aa6c69a3bb67d5d50d9756e10aced42705182a"
   peerDependencies:
     "@nicholas-roether/palantir-ui": ~2.2.0
-  checksum: 12a991c0de7b2a40c71fbf526b509b7ad0020b1ce009a09c37c14cbfe64ca52990e42b772a9d8a4c03fc8018909973be6315c511800a2cff78c66cd9788a47b4
+    solid-js: "*"
+  checksum: 5867f51bcf45db99b182e1bf0568e2e80bf3d8443fea642ca94da46b1e7c98d0b6f9dc071589b7117f028a2d7f3cec82d588f58becddacd16b7f75b0dc4b1c23
   languageName: node
   linkType: hard
 
@@ -4032,7 +4031,7 @@ __metadata:
     "@babel/preset-typescript": ^7.21.4
     "@emotion/css": ^11.11.0
     "@nicholas-roether/palantir-ui": ^2.2.1
-    "@nicholas-roether/palantir-ui-solid": ^2.2.4
+    "@nicholas-roether/palantir-ui-solid": ^2.2.7
     "@types/firefox-webext-browser": ^111.0.1
     "@types/webextension-polyfill": ^0.10.0
     "@typescript-eslint/eslint-plugin": ^5.58.0
@@ -4050,7 +4049,7 @@ __metadata:
     peerjs: ^1.4.7
     prettier: ^2.8.7
     simlo: ^1.0.0
-    solid-js: ^1.7.3
+    solid-js: ^1.7.6
     style-loader: ^3.3.3
     ts-loader: ^9.4.2
     tslib: ^2.5.0
@@ -4617,23 +4616,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"solid-js@npm:^1.7.3":
-  version: 1.7.3
-  resolution: "solid-js@npm:1.7.3"
+"solid-js@npm:^1.7.6":
+  version: 1.7.6
+  resolution: "solid-js@npm:1.7.6"
   dependencies:
     csstype: ^3.1.0
     seroval: ^0.5.0
-  checksum: 052a3148b6d0960312793781435005c16a7a80c2271e2bf2370ec22ec57ffd77e3e4a41335c1bd785ab36500adef86da79536445983efbed404db860e11593d4
-  languageName: node
-  linkType: hard
-
-"solid-js@npm:^1.7.5":
-  version: 1.7.5
-  resolution: "solid-js@npm:1.7.5"
-  dependencies:
-    csstype: ^3.1.0
-    seroval: ^0.5.0
-  checksum: 45d68b3b4937dfdd96a3361b341744be9b61bf4a0d68c3ba7e33e123d46a0fd2da7c317aa95566579648b95956928edd29f97ef60375815152b0d0c5f0fcb60b
+  checksum: 35306e7f16309075f41caec5aeaa832ecd7795e908195a55e9505e0840e8b2d0cbf04a3531ad9df5bce6a96ab595b1c754513123d612571d3d28783e3418af9c
   languageName: node
   linkType: hard
 
