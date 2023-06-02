@@ -1,4 +1,3 @@
-
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const unpluginIcons = require("unplugin-icons/webpack");
@@ -46,7 +45,22 @@ module.exports = (env) => ({
 			},
 			{
 				test: /\.css$/,
-				use: ["style-loader", "css-loader"]
+				use: [
+					{
+						loader: "style-loader",
+						options: {
+							insert: (element) => {
+								if (window.__styleLoaderLastElement) {
+									window.__styleLoaderLastElement.after(element);
+									return;
+								}
+								window.__styleLoaderLastElement = element;
+								document.head.prepend(element);
+							}
+						}
+					},
+					"css-loader"
+				]
 			}
 		]
 	},
