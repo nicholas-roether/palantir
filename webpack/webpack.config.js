@@ -35,8 +35,8 @@ module.exports = (env) => ({
 					babelrc: false,
 					presets: [
 						"@babel/preset-env",
-						"solid",
-						"@babel/preset-typescript"
+						"@babel/preset-typescript",
+						"solid"
 					]
 				},
 			},
