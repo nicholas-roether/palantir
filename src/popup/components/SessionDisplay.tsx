@@ -6,6 +6,8 @@ import CopyLinkButton from "./CopyLinkButton";
 import UserList from "./UserList";
 import { css } from "@emotion/css";
 import PasswordDisplay from "./PasswordDisplay";
+import HostIcon from "~icons/game-icons/evil-tower";
+import ClientIcon from "~icons/game-icons/eyeball";
 
 interface SessionDisplayProps {
 	status: SessionStatus;
@@ -34,11 +36,13 @@ function SessionDisplay(props: SessionDisplayProps): JSX.Element {
 		<div class={sessionDisplayWrapper}>
 			<Show when={props.status.type == SessionType.HOST}>
 				<Span>
-					Currently <b>hosting</b> a session.
+					Currently <b>hosting</b> a session. <HostIcon />
 				</Span>
 			</Show>
 			<Show when={props.status.type == SessionType.CLIENT}>
-				<Span>Currently in a session.</Span>
+				<Span>
+					Currently in a session. <ClientIcon />
+				</Span>
 			</Show>
 			<div class={inviteArea}>
 				<CopyLinkButton href={inviteLink()}>

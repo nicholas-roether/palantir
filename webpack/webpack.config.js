@@ -65,7 +65,7 @@ module.exports = (env) => ({
 		]
 	},
 	plugins: [
-		unpluginIcons({ scale: 1.5, compiler: "solid" }),
+		unpluginIcons({ scale: 1.2, compiler: "solid", defaultStyle: "vertical-align: sub" }),
 		new CopyPlugin({
 			patterns: [
 				{ from: "./res", to: "." },

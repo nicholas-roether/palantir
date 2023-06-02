@@ -2,6 +2,7 @@ import { JSX } from "solid-js";
 import { createStore } from "solid-js/store";
 import { css } from "@emotion/css";
 import { TextInput, Button } from "@nicholas-roether/palantir-ui-solid";
+import HostIcon from "~icons/game-icons/evil-tower";
 import { createHostSession } from "../handle-session";
 
 interface SessionCreationFormState {
@@ -37,7 +38,7 @@ function SessionCreationForm(): JSX.Element {
 				onChange={(evt) => setState({ username: evt.target.value })}
 			/>
 			<Button large smoldering type="submit">
-				Host Session
+				<HostIcon /> Host Session
 			</Button>
 		</form>
 	);
