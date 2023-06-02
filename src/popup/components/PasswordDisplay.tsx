@@ -22,20 +22,32 @@ const passwordDisplay = css`
 	align-items: center;
 	background-color: var(--pui-color-background);
 	border: 3px var(--pui-color-surface) solid;
+	min-width: 6em;
 `;
 
 const passwordText = css`
 	flex: 1;
 	font-family: monospace;
 	font-size: 0.8em;
+	padding: 0 10px;
+	overflow-x: auto;
 `;
 
 const passwordVisibleButton = css`
 	width: 3em;
+	height: 100%;
 	border: none;
-	background-color: transparent;
+	background-color: var(--pui-color-surface);
 	color: var(--pui-color-text);
 	cursor: pointer;
+	
+	& > svg {
+		transition: filter var(--pui-duration-hover) ease-out;	
+	}
+
+	&:hover > svg {
+		filter: drop-shadow(0 0 8px var(--pui-color-active));
+	}
 `;
 
 function PasswordDisplay(props: PasswordDisplayProps): JSX.Element {

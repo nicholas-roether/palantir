@@ -18,6 +18,14 @@ const sessionDisplayWrapper = css`
 	gap: 20px;
 `;
 
+const inviteArea = css`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 10px;
+	width: 100%;
+`;
+
 function SessionDisplay(props: SessionDisplayProps): JSX.Element {
 	const inviteLink = (): string =>
 		createInviteLink(props.status.username, props.status.hostId);
@@ -25,15 +33,19 @@ function SessionDisplay(props: SessionDisplayProps): JSX.Element {
 	return (
 		<div class={sessionDisplayWrapper}>
 			<Show when={props.status.type == SessionType.HOST}>
-				<Span>Currently <b>hosting</b> a session.</Span>
+				<Span>
+					Currently <b>hosting</b> a session.
+				</Span>
 			</Show>
 			<Show when={props.status.type == SessionType.CLIENT}>
 				<Span>Currently in a session.</Span>
 			</Show>
-			<PasswordDisplay password={props.status.accessToken} />
-			<CopyLinkButton href={inviteLink()}>
-				Copy invite link
-			</CopyLinkButton>
+			<div class={inviteArea}>
+				<CopyLinkButton href={inviteLink()}>
+					Copy invite link
+				</CopyLinkButton>
+				<PasswordDisplay password={props.status.accessToken} />
+			</div>
 			<UserList users={props.status.users} />
 		</div>
 	);

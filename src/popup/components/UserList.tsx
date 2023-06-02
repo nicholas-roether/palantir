@@ -9,7 +9,7 @@ interface UserListProps {
 
 const usersListCard = css`
 	display: block;
-	width: 80%;
+	width: 100%;
 	padding-bottom: 10px;
 `;
 

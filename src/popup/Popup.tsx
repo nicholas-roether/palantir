@@ -8,12 +8,12 @@ import SessionDisplay from "./components/SessionDisplay";
 
 const container = css`
 	width: 400px;
-	padding: 10px 0;
+	padding: 10px 20px;
 `;
 
 const contentWrapper = css`
-	padding: 0 10px 20px;
 	text-align: center;
+	padding-bottom: 10px;
 `;
 
 function Popup(): JSX.Element {
