@@ -1,6 +1,7 @@
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const unpluginIcons = require("unplugin-icons/webpack");
 
 const wd = path.resolve(__dirname, "..");
 const src = path.join(wd, "src");
@@ -47,6 +48,7 @@ module.exports = (env) => ({
 		]
 	},
 	plugins: [
+		unpluginIcons({ scale: 1.5, compiler: "solid" }),
 		new CopyPlugin({
 			patterns: [
 				{ from: "./res", to: "." },

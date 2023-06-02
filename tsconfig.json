@@ -7,7 +7,7 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"importHelpers": true,
-		"types": ["@types/firefox-webext-browser"],
+		"types": ["@types/firefox-webext-browser", "unplugin-icons/types/solid"],
 		"jsx": "preserve",
 		"jsxImportSource": "solid-js"
 	},

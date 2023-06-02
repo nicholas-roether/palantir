@@ -1,4 +1,6 @@
 import { JSX, Show, createSignal } from "solid-js";
+import EyeClosedIcon from "~icons/game-icons/sight-disabled";
+import EyeOpenIcon from "~icons/game-icons/semi-closed-eye";
 import { css } from "@emotion/css";
 
 interface PasswordDisplayProps {
@@ -16,18 +18,24 @@ function displayPassword(password: string, visible: boolean): string {
 
 const passwordDisplay = css`
 	display: flex;
+	height: 2em;
+	align-items: center;
+	background-color: var(--pui-color-background);
+	border: 3px var(--pui-color-surface) solid;
 `;
 
 const passwordText = css`
 	flex: 1;
-	border: 3px transparent solid;
-	background-color: var(--pui-color-background);
+	font-family: monospace;
+	font-size: 0.8em;
 `;
 
 const passwordVisibleButton = css`
 	width: 3em;
 	border: none;
 	background-color: transparent;
+	color: var(--pui-color-text);
+	cursor: pointer;
 `;
 
 function PasswordDisplay(props: PasswordDisplayProps): JSX.Element {
@@ -46,10 +54,10 @@ function PasswordDisplay(props: PasswordDisplayProps): JSX.Element {
 				aria-label={buttonLabel()}
 			>
 				<Show when={visible()}>
-					{/* TODO */}
+					<EyeOpenIcon />
 				</Show>
 				<Show when={!visible()}>
-					{/* TODO */}
+					<EyeClosedIcon />
 				</Show>
 			</button>
 		</div>
