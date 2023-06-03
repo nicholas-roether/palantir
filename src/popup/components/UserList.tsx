@@ -1,7 +1,50 @@
-import { For, JSX } from "solid-js";
+import { For, JSX, Match, Switch } from "solid-js";
 import { Card, Heading } from "@nicholas-roether/palantir-ui-solid";
-import { User } from "../../common/messages";
+import { User, UserRole } from "../../common/messages";
 import { css } from "@emotion/css";
+import { ClientIcon, HostIcon } from "../../common/components/icons";
+
+interface UserTileProps {
+	user: User;
+}
+
+const userTile = css`
+	display: flex;
+	gap: 10px;
+	padding: 5px;
+	text-align: left;
+
+	&:nth-child(even) {
+		background-color: var(--pui-color-background);
+	}
+`;
+
+const userTileIcon = css`
+	width: 2em;
+	text-align: center;
+`;
+
+const userTileName = css`
+	flex: 1;
+`;
+
+function UserTile(props: UserTileProps): JSX.Element {
+	return (
+		<div class={userTile}>
+			<div class={userTileIcon}>
+				<Switch>
+					<Match when={props.user.role == UserRole.HOST}>
+						<HostIcon />
+					</Match>
+					<Match when={props.user.role == UserRole.GUEST}>
+						<ClientIcon />
+					</Match>
+				</Switch>
+			</div>
+			<div class={userTileName}>{props.user.name}</div>
+		</div>
+	);
+}
 
 interface UserListProps {
 	users: User[];
@@ -13,32 +56,18 @@ const usersListCard = css`
 	padding-bottom: 10px;
 `;
 
-const userList = css`
+const usersList = css`
 	border: 3px var(--pui-color-background) solid;
 `
-
-const userTile = css`
-	&:nth-child(even) {
-		background-color: var(--pui-color-background);
-	}
-`;
 
 function UserList(props: UserListProps): JSX.Element {
 	return (
 		<Card class={usersListCard}>
 			<Heading size="2">Users</Heading>
-			<div class={userList}>
+			<div class={usersList}>
 				<For each={props.users}>
-					{(user) => <div class={userTile}>{user.name}</div>}
+					{(user) => <UserTile user={user} />}
 				</For>
-				{/* TODO: remove */}
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
-				<div class={userTile}>Test User</div>
 			</div>
 		</Card>
 	);
