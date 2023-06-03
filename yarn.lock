@@ -1775,20 +1775,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nicholas-roether/palantir-ui-solid@npm:^2.2.7":
-  version: 2.2.7
-  resolution: "@nicholas-roether/palantir-ui-solid@npm:2.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui-solid%2F2.2.7%2F49aa6c69a3bb67d5d50d9756e10aced42705182a"
+"@nicholas-roether/palantir-ui-solid@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@nicholas-roether/palantir-ui-solid@npm:2.3.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui-solid%2F2.3.0%2F9693fa236b5baf508921a6b1e6a83ddd469a8bd1"
   peerDependencies:
-    "@nicholas-roether/palantir-ui": ~2.2.0
-    solid-js: "*"
-  checksum: 5867f51bcf45db99b182e1bf0568e2e80bf3d8443fea642ca94da46b1e7c98d0b6f9dc071589b7117f028a2d7f3cec82d588f58becddacd16b7f75b0dc4b1c23
+    "@nicholas-roether/palantir-ui": ~2.3.0
+  checksum: 184e5cc8dc02900b4772440854babac31e7800572a490a42c226cb7cf4d2646669e69e756d40eab46125ac95fb45aa41b0100d20dbb4d5e4678fd65479cc53d5
   languageName: node
   linkType: hard
 
-"@nicholas-roether/palantir-ui@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "@nicholas-roether/palantir-ui@npm:2.2.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui%2F2.2.1%2F1e95127c751514717e85d7bb7a961acc5d3d90f1"
-  checksum: 9c6c931e778dc66e9d8034df03b2e06e9e934bbe67eaeb237bd624ae361c3a013b13dc00fcacb49dd493d0ba3ed8268cfdecf685d8a603783292d02896cf1b54
+"@nicholas-roether/palantir-ui@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@nicholas-roether/palantir-ui@npm:2.3.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40nicholas-roether%2Fpalantir-ui%2F2.3.0%2Ffc9b2f9de57b0f391d4c352cb067b7cce311ef56"
+  checksum: cc9c566c62d345b18813465c264d65ddf6608c7416b1bda2f58c628b4276d8b87722445825a5f381316fc13715aab1106cbbae58f2f9ec1730eb532741b0b64f
   languageName: node
   linkType: hard
 
@@ -5073,8 +5072,8 @@ __metadata:
     "@emotion/babel-plugin": ^11.11.0
     "@emotion/css": ^11.11.0
     "@iconify-json/game-icons": ^1.1.2
-    "@nicholas-roether/palantir-ui": ^2.2.1
-    "@nicholas-roether/palantir-ui-solid": ^2.2.7
+    "@nicholas-roether/palantir-ui": ^2.3.0
+    "@nicholas-roether/palantir-ui-solid": ^2.3.0
     "@svgr/core": ^8.0.0
     "@svgr/plugin-jsx": ^8.0.1
     "@types/firefox-webext-browser": ^111.0.1
