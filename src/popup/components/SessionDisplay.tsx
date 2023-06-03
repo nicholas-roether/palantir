@@ -6,8 +6,7 @@ import CopyLinkButton from "./CopyLinkButton";
 import UserList from "./UserList";
 import { css } from "@emotion/css";
 import PasswordDisplay from "./PasswordDisplay";
-import HostIcon from "~icons/game-icons/evil-tower";
-import ClientIcon from "~icons/game-icons/eyeball";
+import { ClientIcon, HostIcon } from "../../common/components/icons";
 
 interface SessionDisplayProps {
 	status: SessionStatus;

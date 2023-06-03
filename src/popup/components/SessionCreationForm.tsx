@@ -2,8 +2,8 @@ import { JSX } from "solid-js";
 import { createStore } from "solid-js/store";
 import { css } from "@emotion/css";
 import { TextInput, Button } from "@nicholas-roether/palantir-ui-solid";
-import HostIcon from "~icons/game-icons/evil-tower";
 import { createHostSession } from "../handle-session";
+import { HostIcon } from "../../common/components/icons";
 
 interface SessionCreationFormState {
 	username: string;

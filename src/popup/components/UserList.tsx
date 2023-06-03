@@ -13,8 +13,12 @@ const usersListCard = css`
 	padding-bottom: 10px;
 `;
 
+const userList = css`
+	border: 3px var(--pui-color-background) solid;
+`
+
 const userTile = css`
-	&:nth-child(odd) {
+	&:nth-child(even) {
 		background-color: var(--pui-color-background);
 	}
 `;
@@ -23,9 +27,19 @@ function UserList(props: UserListProps): JSX.Element {
 	return (
 		<Card class={usersListCard}>
 			<Heading size="2">Users</Heading>
-			<For each={props.users}>
-				{(user) => <div class={userTile}>{user.name}</div>}
-			</For>
+			<div class={userList}>
+				<For each={props.users}>
+					{(user) => <div class={userTile}>{user.name}</div>}
+				</For>
+				{/* TODO: remove */}
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+				<div class={userTile}>Test User</div>
+			</div>
 		</Card>
 	);
 }

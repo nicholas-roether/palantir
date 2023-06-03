@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
 import { Button } from "@nicholas-roether/palantir-ui-solid";
-import ShareIcon from "~icons/game-icons/pentacle";
+import { ShareIcon } from "../../common/components/icons";
 
 interface CopyLinkButtonProps {
 	href: string;

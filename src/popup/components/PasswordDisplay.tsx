@@ -1,7 +1,6 @@
 import { JSX, Show, createSignal } from "solid-js";
-import EyeClosedIcon from "~icons/game-icons/sight-disabled";
-import EyeOpenIcon from "~icons/game-icons/semi-closed-eye";
 import { css } from "@emotion/css";
+import { EyeClosedIcon, EyeOpenIcon } from "../../common/components/icons";
 
 interface PasswordDisplayProps {
 	password: string;
