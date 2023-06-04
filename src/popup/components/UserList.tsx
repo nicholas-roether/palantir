@@ -1,11 +1,11 @@
-import { For, JSX, Match, Switch } from "solid-js";
+import { For, JSX, Match, Show, Switch } from "solid-js";
 import { Card, Heading } from "@nicholas-roether/palantir-ui-solid";
-import { User, UserRole } from "../../common/messages";
 import { css } from "@emotion/css";
 import { ClientIcon, HostIcon } from "../../common/components/icons";
 
 interface UserTileProps {
-	user: User;
+	host?: boolean;
+	user: string;
 }
 
 const userTile = css`
@@ -33,21 +33,22 @@ function UserTile(props: UserTileProps): JSX.Element {
 		<div class={userTile}>
 			<div class={userTileIcon}>
 				<Switch>
-					<Match when={props.user.role == UserRole.HOST}>
+					<Match when={props.host}>
 						<HostIcon />
 					</Match>
-					<Match when={props.user.role == UserRole.GUEST}>
+					<Match when={!props.host}>
 						<ClientIcon />
 					</Match>
 				</Switch>
 			</div>
-			<div class={userTileName}>{props.user.name}</div>
+			<div class={userTileName}>{props.user}</div>
 		</div>
 	);
 }
 
 interface UserListProps {
-	users: User[];
+	host?: string;
+	guests: string[];
 }
 
 const usersListCard = css`
@@ -65,7 +66,10 @@ function UserList(props: UserListProps): JSX.Element {
 		<Card class={usersListCard}>
 			<Heading size="2">Users</Heading>
 			<div class={usersList}>
-				<For each={props.users}>
+				<Show when={props.host}>
+					<UserTile host user={props.host!} />
+				</Show>
+				<For each={props.guests}>
 					{(user) => <UserTile user={user} />}
 				</For>
 			</div>

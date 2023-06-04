@@ -2,20 +2,15 @@ import ty from "lifeboat";
 import {
 	SessionCloseReason,
 	SessionStatus,
-	SessionStatusUpdateMessage,
-	UserRole
+	SessionStatusUpdateMessage
 } from "../../common/messages";
 import { EventEmitter } from "../../common/event_emitter";
 import sessionLogger from "./logger";
 import { MessagePort } from "../../common/message_port";
 
 const sessionUpdatePacketSchema = ty.object({
-	users: ty.array(
-		ty.object({
-			name: ty.string(),
-			role: ty.enum(UserRole.GUEST, UserRole.HOST)
-		})
-	)
+	host: ty.string(),
+	guests: ty.array(ty.string())
 });
 
 class Session extends EventEmitter<{ closed: SessionCloseReason }> {

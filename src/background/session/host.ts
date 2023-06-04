@@ -1,9 +1,7 @@
 import { Session } from ".";
 import {
 	ConnectionState,
-	SessionType,
-	User,
-	UserRole
+	SessionType
 } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
 import MediaSyncHost from "../media_sync/host";
@@ -115,11 +113,11 @@ class HostSessionHandler {
 		log.debug(
 			`Host session on tab ${this.session.tabId} is broadcasting a status update`
 		);
-		const users = this.getUsers();
 		for (const connectedUser of this.connectedUsers) {
 			connectedUser.connection.send({
 				type: PacketType.SESSION_UPDATE,
-				users
+				host: this.username,
+				guests: this.getGuests()
 			});
 		}
 	}
@@ -128,19 +126,19 @@ class HostSessionHandler {
 		this.session.postStatusUpdate({
 			type: SessionType.HOST,
 			hostId: await this.getId(),
-			username: this.username,
+			host: this.username,
 			accessToken: this.accessToken,
 			connectionState: ConnectionState.CONNECTED,
-			users: this.getUsers()
+			guests: this.getGuests()
 		});
 	}
 
-	private getUsers(): User[] {
-		const users: User[] = [{ role: UserRole.HOST, name: this.username }];
+	private getGuests(): string[] {
+		const guests: string[] = [];
 		for (const connectedUser of this.connectedUsers) {
-			users.push({ role: UserRole.GUEST, name: connectedUser.username });
+			guests.push(connectedUser.username);
 		}
-		return users;
+		return guests;
 	}
 }
 

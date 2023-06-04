@@ -28,8 +28,10 @@ const inviteArea = css`
 `;
 
 function SessionDisplay(props: SessionDisplayProps): JSX.Element {
-	const inviteLink = (): string =>
-		createInviteLink(props.status.username, props.status.hostId);
+	function inviteLink(): string | null {
+		if (!props.status.host) return null;
+		return createInviteLink(props.status.host, props.status.hostId);
+	}
 
 	return (
 		<div class={sessionDisplayWrapper}>
@@ -43,13 +45,15 @@ function SessionDisplay(props: SessionDisplayProps): JSX.Element {
 					Currently in a session. <ClientIcon />
 				</Span>
 			</Show>
-			<div class={inviteArea}>
-				<CopyLinkButton href={inviteLink()}>
-					Copy invite link
-				</CopyLinkButton>
-				<PasswordDisplay password={props.status.accessToken} />
-			</div>
-			<UserList users={props.status.users} />
+			<Show when={inviteLink()}>
+				<div class={inviteArea}>
+					<CopyLinkButton href={inviteLink()!}>
+						Copy invite link
+					</CopyLinkButton>
+					<PasswordDisplay password={props.status.accessToken} />
+				</div>
+			</Show>
+			<UserList host={props.status.host} guests={props.status.guests} />
 		</div>
 	);
 }

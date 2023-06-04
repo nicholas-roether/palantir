@@ -2,9 +2,7 @@ import { checkType } from "lifeboat";
 import {
 	ConnectionState,
 	SessionCloseReason,
-	SessionType,
-	User,
-	UserRole
+	SessionType
 } from "../../common/messages";
 import { ClientSessionAuth } from "../auth";
 import { Connection, Packet, Peer } from "../p2p";
@@ -17,7 +15,7 @@ const log = sessionLogger.sub("client");
 
 class ClientSessionHandler {
 	private static readonly CONNECTION_TIMEOUT = 5000; // ms
-	
+
 	private readonly session: Session;
 	private readonly peer: Peer;
 	private readonly username: string;
@@ -26,7 +24,8 @@ class ClientSessionHandler {
 	private syncClient: MediaSyncClient | null = null;
 
 	private connectionState = ConnectionState.CONNECTING;
-	private users: User[];
+	private host?: string;
+	private guests: string[];
 
 	constructor(
 		session: Session,
@@ -37,7 +36,7 @@ class ClientSessionHandler {
 		this.session = session;
 		this.username = username;
 		this.hostId = hostId;
-		this.users = [{ role: UserRole.GUEST, name: this.username }];
+		this.guests = [this.username];
 		this.auth = new ClientSessionAuth(username, accessToken);
 		this.peer = new Peer((conn) => this.onConnection(conn));
 
@@ -115,17 +114,18 @@ class ClientSessionHandler {
 			);
 			return;
 		}
-		this.users = packet.users;
+		this.host = packet.host;
+		this.guests = packet.guests;
 	}
 
 	private postStatusUpdate(): void {
 		this.session.postStatusUpdate({
 			type: SessionType.CLIENT,
 			hostId: this.hostId,
-			username: this.username,
+			host: this.host,
 			accessToken: this.auth.accessToken,
 			connectionState: this.connectionState,
-			users: this.users
+			guests: this.guests	
 		});
 	}
 }
