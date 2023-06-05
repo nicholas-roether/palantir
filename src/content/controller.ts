@@ -7,6 +7,7 @@ import frameLogger from "./logger";
 const log = frameLogger.sub("controller");
 
 const HEARTBEAT_RATE = 1000; // ms
+const TOLERANCE = 200; // ms
 
 class MediaElementController {
 	private readonly port: MessagePort;
@@ -77,6 +78,9 @@ class MediaElementController {
 	}
 
 	private setTime(time: number): void {
+		const difference = Math.abs(time - this.getTime());
+		if (difference < TOLERANCE) return;
+
 		const timeSeconds = time / 1000;
 		this.element.currentTime = timeSeconds;
 	}
