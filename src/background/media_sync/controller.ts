@@ -44,6 +44,7 @@ class MediaController extends EventEmitter<{
 			return;
 		}
 
+		log.debug(`Incoming media sync packet: ${JSON.stringify(packet)}`);
 		this.port.post(
 			new MediaSyncMessage(packet.playing, packet.time, packet.timestamp)
 		);
@@ -62,6 +63,7 @@ class MediaController extends EventEmitter<{
 
 	private onMessage(msg: Message): void {
 		if (msg.type != MessageType.MEDIA_SYNC) return;
+		log.debug(`Outgoing media sync event: ${JSON.stringify(msg)}`);
 		this.emit("packet", {
 			type: PacketType.SYNC_MEDIA,
 			playing: msg.playing,
