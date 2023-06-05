@@ -10,7 +10,9 @@ const enum MessageType {
 	CONNECT_MEDIA_ELEMENT,
 	MEDIA_ELEMENT_CONNECTION_RESULT,
 	DISCOVER_MEDIA,
-	MEDIA_FOUND
+	MEDIA_FOUND,
+	POLL_FRAME_READY,
+	FRAME_READY
 }
 
 class CreateHostSessionMessage {
@@ -162,6 +164,24 @@ class MediaFoundMessage {
 	}
 }
 
+class PollFrameReadyMessage {
+	public readonly type = MessageType.POLL_FRAME_READY;
+	public readonly href: string;
+
+	constructor(href: string) {
+		this.href = href;
+	}
+}
+
+class FrameReadyMessage {
+	public readonly type = MessageType.FRAME_READY;
+	public readonly href: string;
+
+	constructor(href: string) {
+		this.href = href;
+	}
+}
+
 type Message =
 	| CreateHostSessionMessage
 	| CreateClientSessionMessage
@@ -174,7 +194,9 @@ type Message =
 	| ConnectMediaElementMessage
 	| MediaElementConnectionResultMessage
 	| DiscoverMediaMessage
-	| MediaFoundMessage;
+	| MediaFoundMessage
+	| PollFrameReadyMessage
+	| FrameReadyMessage;
 
 export {
 	MessageType,
@@ -194,5 +216,7 @@ export {
 	ConnectMediaElementMessage,
 	MediaElementConnectionResultMessage,
 	DiscoverMediaMessage,
-	MediaFoundMessage
+	MediaFoundMessage,
+	PollFrameReadyMessage,
+	FrameReadyMessage
 };

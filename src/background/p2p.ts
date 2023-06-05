@@ -130,6 +130,7 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 	}
 
 	public send(data: Packet): void {
+		p2pLogger.debug(`Outgoing packet: ${JSON.stringify(data)}`);
 		this.connection.send(data);
 	}
 
@@ -143,6 +144,7 @@ class Connection extends EventEmitter<ConnectionEventMap> {
 
 	private onData(data: unknown): void {
 		if (checkType(packetSchema, data)) {
+			p2pLogger.debug(`Incoming packet: ${JSON.stringify(data)}`);
 			this.emit("packet", data);
 		} else {
 			p2pLogger.error(

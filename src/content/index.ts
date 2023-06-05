@@ -1,8 +1,10 @@
 import { frameAddress } from "../common/addresses";
 import { MessagePort, MessagePortMessageEvent } from "../common/message_port";
 import {
+	FrameReadyMessage,
 	MediaElementConnectionResultMessage,
-	MessageType
+	MessageType,
+	PollFrameReadyMessage
 } from "../common/messages";
 import MediaElementController from "./controller";
 import { discoverMedia } from "./discover";
@@ -11,7 +13,20 @@ import frameLogger from "./logger";
 const log = frameLogger;
 
 function onBusMessage({ message }: MessagePortMessageEvent): void {
-	if (message.type == MessageType.DISCOVER_MEDIA) discoverMedia();
+	switch (message.type) {
+		case MessageType.POLL_FRAME_READY:
+			handlePoll(message);
+			break;
+		case MessageType.DISCOVER_MEDIA:
+			discoverMedia();
+	}
+}
+
+function handlePoll(message: PollFrameReadyMessage): void {
+	if (location.href == message.href) {
+		log.debug("Readiness poll received, responding...");
+		MessagePort.bus.post(new FrameReadyMessage(location.href));
+	}
 }
 
 async function handlePort(port: MessagePort): Promise<void> {

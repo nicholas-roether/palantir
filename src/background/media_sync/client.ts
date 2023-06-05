@@ -7,6 +7,7 @@ import { ConnectMediaElementMessage, MessageType } from "../../common/messages";
 import { promiseWithTimeout } from "../../common/utils";
 import MediaController from "./controller";
 import { frameAddress } from "../../common/addresses";
+import { contentReady } from "../session/common";
 
 const log = mediaSyncLogger.sub("client");
 
@@ -71,6 +72,7 @@ class MediaSyncClient {
 		}
 
 		await this.navigateTo(packet.windowHref);
+		await contentReady(this.tabId, packet.frameHref);
 
 		const port = MessagePort.connect(
 			this.tabId,
@@ -93,27 +95,9 @@ class MediaSyncClient {
 			.then((tab) => tab.url);
 		if (!currentHref) throw new Error("Failed to look up url of tab!");
 
-		const donePromise = new Promise<void>((res) => {
-			const handler = (
-				tabId: number,
-				changeInfo: browser.tabs._OnUpdatedChangeInfo
-			): void => {
-				if (tabId != this.tabId || changeInfo.status != "complete")
-					return;
-				browser.tabs.onUpdated.removeListener(handler);
-				log.debug(`Navigation to ${href} complete!`);
-				res(undefined);
-			};
-			browser.tabs.onUpdated.addListener(handler, {
-				properties: ["status"]
-			});
-		});
-
 		if (currentHref != href) {
 			await browser.tabs.update(this.tabId, { url: href });
 		}
-
-		return donePromise;
 	}
 
 	private async connectElement(

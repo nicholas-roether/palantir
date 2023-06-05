@@ -171,7 +171,7 @@ class MessagePort extends EventEmitter<{
 	): void {
 		log.debug(`Message port listener opened on "${name}"`);
 		browser.runtime.onConnect.addListener((port) => {
-			log.debug(`Received port connection to "${port}"`)
+			log.debug(`Received port connection to "${port.name}"`)
 			if (port.name !== name) return;
 			handler(new MessagePort(new MessagePortConnectionAdapter(port)));
 		});
