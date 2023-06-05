@@ -99,14 +99,22 @@ class HostSessionHandler {
 	private onPacket(packet: Packet, user: ConnectedUser): void {
 		switch (packet.type) {
 			case PacketType.START_MEDIA_SYNC:
-				user.syncSubscription?.stop();
-				user.syncSubscription = this.syncServer.subscribeClient(
-					user.connection
-				);
+				this.startMediaSync(user);
 				break;
 			case PacketType.STOP_MEDIA_SYNC:
-				user.syncSubscription?.stop();
+				this.stopMediaSync(user);
 		}
+	}
+
+	private startMediaSync(user: ConnectedUser): void {
+		user.syncSubscription?.stop();
+		this.syncHost.initConnection(user.connection);
+		user.syncSubscription = this.syncServer.subscribeClient(user.connection);
+	}
+
+	private stopMediaSync(user: ConnectedUser): void {
+		user.syncSubscription?.stop();
+		user.syncSubscription = null;
 	}
 
 	private sendSessionUpdate(): void {
