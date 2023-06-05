@@ -105,6 +105,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 		port.post(new RequestMediaHeartbeatMessage());
 
 		this.controller = new MediaController(port);
+		this.controller.on("packet", (packet) => this.subscription.send(packet));
 		return true;
 	}
 
