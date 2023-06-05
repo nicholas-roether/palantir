@@ -84,6 +84,7 @@ class MediaSyncClient {
 		if (!success) return;
 
 		const controller = new MediaController(port);
+		controller.on("packet", (packet) => this.connection.send(packet));
 		this.controller?.stop();
 		this.controller = controller;
 	}
