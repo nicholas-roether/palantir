@@ -116,6 +116,8 @@ class ClientSessionHandler {
 		}
 		this.host = packet.host;
 		this.guests = packet.guests;
+
+		this.postStatusUpdate();
 	}
 
 	private postStatusUpdate(): void {
