@@ -6,6 +6,7 @@ import { MessagePort } from "../../common/message_port";
 import { ConnectMediaElementMessage, MessageType } from "../../common/messages";
 import { promiseWithTimeout } from "../../common/utils";
 import MediaController from "./controller";
+import { frameAddress } from "../../common/addresses";
 
 const log = mediaSyncLogger.sub("client");
 
@@ -15,7 +16,7 @@ const mediaSyncInitPacketSchema = ty.object({
 	elementQuery: ty.string()
 });
 
-const FRAME_RESPONSE_TIMEOUT = 100; // ms
+const FRAME_RESPONSE_TIMEOUT = 6000; // ms
 
 class MediaSyncClient {
 	private readonly connection: Connection;
@@ -71,7 +72,7 @@ class MediaSyncClient {
 
 		await this.navigateTo(packet.windowHref);
 
-		const port = MessagePort.connect(this.tabId, packet.frameHref);
+		const port = MessagePort.connect(this.tabId, frameAddress(packet.frameHref));
 		if (!port) return;
 
 		const success = await this.connectElement(port, packet.elementQuery);
