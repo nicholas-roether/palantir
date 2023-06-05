@@ -72,7 +72,10 @@ class MediaSyncClient {
 
 		await this.navigateTo(packet.windowHref);
 
-		const port = MessagePort.connect(this.tabId, frameAddress(packet.frameHref));
+		const port = MessagePort.connect(
+			this.tabId,
+			frameAddress(packet.frameHref)
+		);
 		if (!port) return;
 
 		const success = await this.connectElement(port, packet.elementQuery);
@@ -84,14 +87,33 @@ class MediaSyncClient {
 	}
 
 	private async navigateTo(href: string): Promise<void> {
+		log.info(`Navigating to ${href}...`)
 		const currentHref = await browser.tabs
 			.get(this.tabId)
 			.then((tab) => tab.url);
 		if (!currentHref) throw new Error("Failed to look up url of tab!");
 
+		const donePromise = new Promise<void>((res) => {
+			const handler = (
+				tabId: number,
+				changeInfo: browser.tabs._OnUpdatedChangeInfo
+			): void => {
+				if (tabId != this.tabId || changeInfo.status != "complete")
+					return;
+				browser.tabs.onUpdated.removeListener(handler);
+				log.debug(`Navigation to ${href} complete!`);
+				res(undefined);
+			};
+			browser.tabs.onUpdated.addListener(handler, {
+				properties: ["status"]
+			});
+		});
+
 		if (currentHref != href) {
 			await browser.tabs.update(this.tabId, { url: href });
 		}
+
+		return donePromise;
 	}
 
 	private async connectElement(
