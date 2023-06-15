@@ -12,21 +12,24 @@ const TOLERANCE = 500; // ms
 class MediaElementController {
 	private readonly port: MessagePort;
 	private readonly element: HTMLMediaElement;
-	private readonly ignoreNext: Set<string>;
-	private lastUpdate = 0;
+	private lastUpdate: number;
+	private seekPosition: number;
+	private paused: boolean;
 	private running = false;
 
 	constructor(port: MessagePort, element: HTMLMediaElement) {
 		this.port = port;
 		this.element = element;
-		this.ignoreNext = new Set();
+		this.lastUpdate = 0;
+		this.seekPosition = 0;
+		this.paused = true;
 	}
 
 	public start(): void {
 		this.port.on("message", ({ message }) => this.onMessage(message));
-		this.element.addEventListener("play", () => this.sendUpdate("play"));
-		this.element.addEventListener("pause", () => this.sendUpdate("pause"));
-		this.element.addEventListener("seeked", () => this.sendUpdate("seeked"));
+		this.element.addEventListener("play", () => this.onPlay());
+		this.element.addEventListener("pause", () => this.onPause());
+		this.element.addEventListener("seeked", () => this.onSeek());
 		this.running = true;
 
 		log.info("Media controller started");
@@ -36,12 +39,12 @@ class MediaElementController {
 		this.running = false;
 
 		log.info("Media controller stopped");
-	}	
+	}
 
 	private startHeartbeat(): void {
 		log.info("Starting media heartbeat...");
 
-		setInterval(() => this.sendUpdate("heartbeat"), HEARTBEAT_RATE);
+		setInterval(() => this.broadcastState(), HEARTBEAT_RATE);
 	}
 
 	private onMessage(message: Message): void {
@@ -65,21 +68,45 @@ class MediaElementController {
 		this.setTime(adjustedTime);
 	}
 
-	private sendUpdate(cause: string): void {
-		if (!this.running) return;
+	private onPlay(): void {
+		if (!this.paused) return;
+		log.debug("Playback started by user.");
+		this.paused = false;
+		this.sendUpdate();
+	}
 
-		if (this.ignoreNext.has(cause)) {
-			this.ignoreNext.delete(cause);
-			return;
-		}
+	private onPause(): void {
+		if (this.paused) return;
+		log.debug("Playback paused by user.");
+		this.paused = true;
+		this.sendUpdate();
+	}
 
+	private onSeek(): void {
+		if (this.isWithinTolerance(this.seekPosition)) return;
+		this.seekPosition = this.getTime();
+		log.debug(`User seeked to time ${this.seekPosition}ms.`);
+		this.sendUpdate();
+	}
+
+	private sendUpdate(): void {
 		log.debug("Playback state updated");
 		this.lastUpdate = Date.now();
+		this.broadcastState();
+	}
+
+	private broadcastState(): void {
+		if (!this.running) return;
+
+		log.debug(
+			`Broadcasting playback state: playing=${!this.element
+				.paused}, time=${this.getTime()} (updated ${this.lastUpdate})`
+		);
 		this.port.post(
 			new MediaSyncMessage(
 				!this.element.paused,
 				this.getTime(),
-				Date.now()
+				this.lastUpdate
 			)
 		);
 	}
@@ -90,25 +117,31 @@ class MediaElementController {
 	}
 
 	private setTime(time: number): void {
-		const difference = Math.abs(time - this.getTime());
-		if (difference < TOLERANCE) return;
+		if (this.isWithinTolerance(time)) return;
+
+		log.debug(`Seeking to time ${time}ms.`);
 
 		const timeSeconds = time / 1000;
-		this.ignoreNext.add("seeked");
+		this.seekPosition = time;
 		this.element.currentTime = timeSeconds;
+	}
+
+	private isWithinTolerance(time: number): boolean {
+		const difference = Math.abs(time - this.getTime());
+		return difference < TOLERANCE;
 	}
 
 	private play(): void {
 		if (!this.element.paused) return;
-
-		this.ignoreNext.add("play");
+		log.debug("Starting playback.");
+		this.paused = false;
 		this.element.play();
 	}
 
 	private pause(): void {
 		if (this.element.paused) return;
-
-		this.ignoreNext.add("pause");
+		log.debug("Pausing playback.");
+		this.paused = true;
 		this.element.pause();
 	}
 
