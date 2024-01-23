@@ -1,10 +1,11 @@
-import { JSX, Show, createSignal } from "solid-js";
+import { JSX, ParentProps, Show, createSignal } from "solid-js";
 import { css } from "@emotion/css";
 import { Heading } from "@nicholas-roether/palantir-ui-solid";
-import { SessionStatus } from "../common/messages";
+import { SessionCloseReason, SessionStatus } from "../common/messages";
 import { requestSessionStatusUpdate, sessionEvents } from "./handle-session";
 import SessionCreationForm from "./components/SessionCreationForm";
 import SessionDisplay from "./components/SessionDisplay";
+import { closeSession } from "./handle-session";
 
 const container = css`
 	width: 400px;
@@ -30,7 +31,10 @@ function Popup(): JSX.Element {
 					<SessionCreationForm />
 				</Show>
 				<Show when={session() != null}>
-					<SessionDisplay status={session()!} />
+					<SessionDisplay
+						status={session()!}
+						onClose={() => closeSession(SessionCloseReason.CLOSED_BY_USER)}
+					/>
 				</Show>
 			</div>
 		</div>

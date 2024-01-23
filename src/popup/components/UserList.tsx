@@ -54,12 +54,11 @@ interface UserListProps {
 const usersListCard = css`
 	display: block;
 	width: 100%;
-	padding-bottom: 10px;
 `;
 
 const usersList = css`
 	border: 3px var(--pui-color-background) solid;
-`
+`;
 
 function UserList(props: UserListProps): JSX.Element {
 	return (
@@ -69,9 +68,7 @@ function UserList(props: UserListProps): JSX.Element {
 				<Show when={props.host}>
 					<UserTile host user={props.host!} />
 				</Show>
-				<For each={props.guests}>
-					{(user) => <UserTile user={user} />}
-				</For>
+				<For each={props.guests}>{(user) => <UserTile user={user} />}</For>
 			</div>
 		</Card>
 	);
