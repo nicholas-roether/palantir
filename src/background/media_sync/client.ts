@@ -3,29 +3,37 @@ import { Connection, Packet } from "../p2p";
 import mediaSyncLogger from "./logger";
 import PacketType from "../packets";
 import { MessagePort } from "../../common/message_port";
-import { ConnectMediaElementMessage, MessageType } from "../../common/messages";
+import {
+	ConnectMediaElementMessage,
+	MessageType,
+	SessionCloseReason
+} from "../../common/messages";
 import { promiseWithTimeout } from "../../common/utils";
 import MediaController from "./controller";
 import { frameAddress } from "../../common/addresses";
 import { contentReady } from "../session/common";
+import { EventEmitter } from "../../common/event_emitter";
 
 const log = mediaSyncLogger.sub("client");
 
 const mediaSyncInitPacketSchema = ty.object({
+	protocolVersion: ty.number(),
 	windowHref: ty.string(),
 	frameHref: ty.string(),
 	elementQuery: ty.string()
 });
 
+const PROTOCOL_VERSION = 1;
 const FRAME_RESPONSE_TIMEOUT = 6000; // ms
 
-class MediaSyncClient {
+class MediaSyncClient extends EventEmitter<{ close: SessionCloseReason }> {
 	private readonly connection: Connection;
 	private readonly tabId: number;
 	private controller: MediaController | null = null;
 	private packetListener?: number;
 
 	constructor(connection: Connection, tabId: number) {
+		super();
 		this.connection = connection;
 		this.tabId = tabId;
 	}
@@ -71,6 +79,15 @@ class MediaSyncClient {
 			return;
 		}
 
+		if (packet.protocolVersion < PROTOCOL_VERSION) {
+			this.emit("close", SessionCloseReason.HOST_TOO_OLD);
+			return;
+		}
+		if (packet.protocolVersion > PROTOCOL_VERSION) {
+			this.emit("close", SessionCloseReason.CLIENT_TOO_OLD);
+			return;
+		}
+
 		await this.navigateTo(packet.windowHref);
 		await contentReady(this.tabId, packet.frameHref);
 
@@ -90,7 +107,7 @@ class MediaSyncClient {
 	}
 
 	private async navigateTo(href: string): Promise<void> {
-		log.info(`Navigating to ${href}...`)
+		log.info(`Navigating to ${href}...`);
 		const currentHref = await browser.tabs
 			.get(this.tabId)
 			.then((tab) => tab.url);

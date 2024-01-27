@@ -18,6 +18,10 @@ function describeSessionCloseReason(reason: SessionCloseReason): string {
 			return "Unknown reason";
 		case SessionCloseReason.NO_MEDIA:
 			return "No suitable media found in page";
+		case SessionCloseReason.CLIENT_TOO_OLD:
+			return "Client version too old";
+		case SessionCloseReason.HOST_TOO_OLD:
+			return "Host version too old";
 	}
 }
 

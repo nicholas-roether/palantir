@@ -1,7 +1,7 @@
 import { frameAddress } from "../../common/addresses";
 import { MessagePort } from "../../common/message_port";
 import {
-    ConnectMediaElementMessage,
+	ConnectMediaElementMessage,
 	DiscoverMediaMessage,
 	MessageType,
 	RequestMediaHeartbeatMessage,
@@ -26,6 +26,7 @@ interface MediaOption {
 	score: number;
 }
 
+const PROTOCOL_VERSION = 1;
 const DISCOVERY_TIMEOUT = 500; // ms
 
 class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
@@ -105,7 +106,9 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 		port.post(new RequestMediaHeartbeatMessage());
 
 		this.controller = new MediaController(port);
-		this.controller.on("packet", (packet) => this.subscription.send(packet));
+		this.controller.on("packet", (packet) =>
+			this.subscription.send(packet)
+		);
 		return true;
 	}
 
@@ -130,6 +133,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 
 		return {
 			type: PacketType.MEDIA_SYNC_INIT,
+			protocolVersion: PROTOCOL_VERSION,
 			windowHref: tab.url,
 			frameHref: this.media.frameHref,
 			elementQuery: this.media.elementQuery

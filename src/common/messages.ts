@@ -98,7 +98,9 @@ const enum SessionCloseReason {
 	TAB_CLOSED,
 	CLOSED_BY_USER,
 	TIMEOUT,
-	NO_MEDIA
+	NO_MEDIA,
+	CLIENT_TOO_OLD,
+	HOST_TOO_OLD
 }
 
 class SessionClosedMessage {

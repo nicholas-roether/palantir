@@ -98,6 +98,7 @@ class ClientSessionHandler {
 		connection.on("packet", (packet) => this.onPacket(packet));
 
 		this.syncClient = new MediaSyncClient(connection, this.session.tabId);
+		this.syncClient.on("close", (reason) => this.session.close(reason));
 		this.syncClient.start();
 	}
 
@@ -127,7 +128,7 @@ class ClientSessionHandler {
 			host: this.host,
 			accessToken: this.auth.accessToken,
 			connectionState: this.connectionState,
-			guests: this.guests	
+			guests: this.guests
 		});
 	}
 }
