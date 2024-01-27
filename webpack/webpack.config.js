@@ -35,7 +35,14 @@ module.exports = function (env) {
 					options: {
 						babelrc: false,
 						presets: [
-							"@babel/preset-env",
+							[
+								"@babel/preset-env",
+								{
+									exclude: [
+										"@babel/plugin-transform-regenerator"
+									]
+								}
+							],
 							"@babel/preset-typescript",
 							"solid"
 						],
