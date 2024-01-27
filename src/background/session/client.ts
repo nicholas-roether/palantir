@@ -146,7 +146,7 @@ class ClientSessionHandler {
 			type: SessionType.CLIENT,
 			hostId: this.hostId,
 			host: this.host,
-			accessToken: this.auth.accessToken,
+			passphrase: this.auth.passphrase,
 			connectionState: this.connectionState,
 			guests: this.guests
 		});

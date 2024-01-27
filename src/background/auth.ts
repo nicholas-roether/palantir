@@ -1,24 +1,16 @@
 import ty, { checkType } from "lifeboat";
-import { encode } from "base64-arraybuffer";
 import { Connection } from "./p2p";
 import PacketType from "./packets";
 import backgroundLogger from "./logger";
 
 const authLogger = backgroundLogger.sub("auth");
 
-const TOKEN_SIZE = 24;
 const RESPONSE_TIMEOUT = 5000; // ms
 
 const authPacketSchema = ty.object({
 	username: ty.string(),
 	token: ty.string()
 });
-
-function generateToken(): string {
-	const array = new Uint8Array(TOKEN_SIZE);
-	crypto.getRandomValues(array);
-	return encode(array.buffer);
-}
 
 interface AuthFailure {
 	success: false;
@@ -32,10 +24,10 @@ interface AuthSuccess {
 type AuthResult = AuthFailure | AuthSuccess;
 
 class HostSessionAuth {
-	public readonly accessToken: string;
+	public readonly passphrase: string;
 
-	constructor() {
-		this.accessToken = generateToken();
+	constructor(passphrase: string) {
+		this.passphrase = passphrase;
 	}
 
 	public async checkAuth(connection: Connection): Promise<AuthResult> {
@@ -65,14 +57,14 @@ class HostSessionAuth {
 			return { success: false };
 		}
 
-		if (res.token != this.accessToken) {
+		if (res.token != this.passphrase) {
 			authLogger.info(
 				`Connection from ${connection.remoteId} refused: incorrect access token`
 			);
 			return { success: false };
 		}
 
-		await connection.send({ type: PacketType.AUTH_ACK });
+		connection.send({ type: PacketType.AUTH_ACK });
 		authLogger.info(
 			`Connection from ${connection.remoteId} successfully authenticated`
 		);
@@ -81,11 +73,11 @@ class HostSessionAuth {
 }
 
 class ClientSessionAuth {
-	public readonly accessToken: string;
+	public readonly passphrase: string;
 	public readonly username: string;
 
-	constructor(username: string, accessToken: string) {
-		this.accessToken = accessToken;
+	constructor(username: string, passphrase: string) {
+		this.passphrase = passphrase;
 		this.username = username;
 	}
 
@@ -96,7 +88,7 @@ class ClientSessionAuth {
 
 		connection.send({
 			type: PacketType.AUTH_TOKEN,
-			token: this.accessToken,
+			token: this.passphrase,
 			username: this.username
 		});
 

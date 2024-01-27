@@ -19,10 +19,12 @@ class CreateHostSessionMessage {
 	public readonly type = MessageType.CREATE_HOST_SESSION;
 	public readonly tabId: number;
 	public readonly username: string;
+	public readonly passphrase: string;
 
-	constructor(tabId: number, username: string) {
+	constructor(tabId: number, username: string, passphrase: string) {
 		this.tabId = tabId;
 		this.username = username;
+		this.passphrase = passphrase;
 	}
 }
 
@@ -73,7 +75,7 @@ const enum ConnectionState {
 interface SessionStatus {
 	type: SessionType;
 	hostId: string;
-	accessToken: string;
+	passphrase: string;
 	connectionState: ConnectionState;
 	host?: string;
 	guests: string[];

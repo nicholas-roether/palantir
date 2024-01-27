@@ -7,6 +7,7 @@ import { HostIcon } from "../../common/components/icons";
 
 interface SessionCreationFormState {
 	username: string;
+	passphrase: string;
 }
 
 const sessionCreationForm = css`
@@ -19,13 +20,14 @@ const sessionCreationForm = css`
 
 function SessionCreationForm(): JSX.Element {
 	const [state, setState] = createStore<SessionCreationFormState>({
-		username: ""
+		username: "",
+		passphrase: ""
 	});
 
 	function onSubmit(evt: SubmitEvent): void {
 		evt.preventDefault();
 		if (state.username.length == 0) return;
-		createHostSession(state.username);
+		createHostSession(state.username, state.passphrase);
 	}
 
 	return (
@@ -36,6 +38,13 @@ function SessionCreationForm(): JSX.Element {
 				aria-label="Nickname"
 				value={state.username}
 				onChange={(evt) => setState({ username: evt.target.value })}
+			/>
+			<TextInput
+				name="passphrase"
+				placeholder="Passphrase"
+				aria-label="Passphrase"
+				value={state.passphrase}
+				onChange={(evt) => setState({ passphrase: evt.target.value })}
 			/>
 			<Button large smoldering type="submit">
 				<HostIcon /> Host Session

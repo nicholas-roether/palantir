@@ -19,10 +19,15 @@ async function getCurrentTab(): Promise<number | null> {
 	return tabId ?? null;
 }
 
-async function createHostSession(username: string): Promise<boolean> {
+async function createHostSession(
+	username: string,
+	passphrase: string
+): Promise<boolean> {
 	const tabId = await getCurrentTab();
 	if (!tabId) return false;
-	await MessagePort.bus.post(new CreateHostSessionMessage(tabId, username));
+	await MessagePort.bus.post(
+		new CreateHostSessionMessage(tabId, username, passphrase)
+	);
 	return true;
 }
 

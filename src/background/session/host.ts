@@ -25,11 +25,11 @@ class HostSessionHandler {
 	private readonly syncHost: MediaSyncHost;
 	private readonly connectedUsers: Set<ConnectedUser>;
 
-	constructor(session: Session, username: string) {
+	constructor(session: Session, username: string, passphrase: string) {
 		this.session = session;
 		this.peer = new Peer((conn) => this.onConnection(conn));
 		this.username = username;
-		this.auth = new HostSessionAuth();
+		this.auth = new HostSessionAuth(passphrase);
 		this.syncServer = new MediaSyncServer();
 		this.syncHost = this.syncServer.subscribeHost(this.session.tabId);
 		this.connectedUsers = new Set();
@@ -42,8 +42,8 @@ class HostSessionHandler {
 		return await this.peer.getId();
 	}
 
-	public get accessToken(): string {
-		return this.auth.accessToken;
+	public get passphrase(): string {
+		return this.auth.passphrase;
 	}
 
 	public start(): void {
@@ -140,7 +140,7 @@ class HostSessionHandler {
 			type: SessionType.HOST,
 			hostId: await this.getId(),
 			host: this.username,
-			accessToken: this.accessToken,
+			passphrase: this.passphrase,
 			connectionState: ConnectionState.CONNECTED,
 			guests: this.getGuests()
 		});

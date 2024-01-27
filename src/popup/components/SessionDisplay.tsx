@@ -73,7 +73,7 @@ function SessionDisplay(props: SessionDisplayProps): JSX.Element {
 						<CopyLinkButton href={inviteLink()!}>
 							Copy invite link
 						</CopyLinkButton>
-						<PasswordDisplay password={props.status.accessToken} />
+						<PasswordDisplay password={props.status.passphrase} />
 					</div>
 				</Show>
 			</Section>

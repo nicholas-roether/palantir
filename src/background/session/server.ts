@@ -84,6 +84,7 @@ class SessionServer {
 
 	private async createHostSession({
 		username,
+		passphrase,
 		tabId
 	}: CreateHostSessionMessage): Promise<void> {
 		log.info(
@@ -92,7 +93,8 @@ class SessionServer {
 
 		const sessionHandler = new HostSessionHandler(
 			await this.createSession(tabId),
-			username
+			username,
+			passphrase
 		);
 		sessionHandler.start();
 	}
