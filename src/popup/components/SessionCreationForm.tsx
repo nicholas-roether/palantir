@@ -40,6 +40,7 @@ function SessionCreationForm(): JSX.Element {
 				onChange={(evt) => setState({ username: evt.target.value })}
 			/>
 			<TextInput
+				type="password"
 				name="passphrase"
 				placeholder="Passphrase"
 				aria-label="Passphrase"
