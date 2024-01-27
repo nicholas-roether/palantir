@@ -7,6 +7,8 @@ import {
 import { EventEmitter } from "../../common/event_emitter";
 import sessionLogger from "./logger";
 import { MessagePort } from "../../common/message_port";
+import { notify } from "./notifications";
+import { describeSessionCloseReason } from "../../common/enum_descriptions";
 
 const sessionUpdatePacketSchema = ty.object({
 	host: ty.string(),
@@ -37,6 +39,7 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 		if (!this.open) return;
 		this.open = false;
 		this.status = null;
+		notify("Palantir Session Closed", describeSessionCloseReason(reason));
 		this.emit("closed", reason);
 		this.broadcastStatus();
 	}

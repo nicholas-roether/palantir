@@ -1,14 +1,12 @@
 import { Session } from ".";
-import {
-	ConnectionState,
-	SessionType
-} from "../../common/messages";
+import { ConnectionState, SessionType } from "../../common/messages";
 import { HostSessionAuth } from "../auth";
 import MediaSyncHost from "../media_sync/host";
 import MediaSyncServer, { SyncSubscription } from "../media_sync/server";
 import { Connection, Packet, Peer } from "../p2p";
 import PacketType from "../packets";
 import sessionLogger from "./logger";
+import { notify } from "./notifications";
 
 const log = sessionLogger.sub("host");
 
@@ -51,6 +49,8 @@ class HostSessionHandler {
 	public start(): void {
 		if (!this.session.isOpen()) return;
 
+		notify("Hosting Palantir Session", "Session is now public");
+
 		this.peer.listen();
 		this.postStatusUpdate();
 		this.syncHost.start();
@@ -70,6 +70,8 @@ class HostSessionHandler {
 			connection.close();
 			return;
 		}
+
+		notify("User Joined", `${authRes.username} joined the session`);
 		log.info(
 			`User ${authRes.username} connected to host session on tab ${this.session.tabId}`
 		);
@@ -88,6 +90,7 @@ class HostSessionHandler {
 			await this.postStatusUpdate();
 			this.sendSessionUpdate();
 
+			notify("User Left", `${authRes.username} left the session`);
 			log.info(
 				`User ${authRes.username} has disconnected from session on tab ${this.session.tabId}`
 			);
@@ -109,7 +112,9 @@ class HostSessionHandler {
 	private startMediaSync(user: ConnectedUser): void {
 		user.syncSubscription?.stop();
 		this.syncHost.initConnection(user.connection);
-		user.syncSubscription = this.syncServer.subscribeClient(user.connection);
+		user.syncSubscription = this.syncServer.subscribeClient(
+			user.connection
+		);
 	}
 
 	private stopMediaSync(user: ConnectedUser): void {

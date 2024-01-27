@@ -1,4 +1,4 @@
-import { checkType } from "lifeboat";
+import { ValidatedBy, checkType } from "lifeboat";
 import {
 	ConnectionState,
 	SessionCloseReason,
@@ -10,6 +10,7 @@ import PacketType from "../packets";
 import { Session } from "./server";
 import { sessionLogger, sessionUpdatePacketSchema } from ".";
 import MediaSyncClient from "../media_sync/client";
+import { notify } from "./notifications";
 
 const log = sessionLogger.sub("client");
 
@@ -115,10 +116,29 @@ class ClientSessionHandler {
 			);
 			return;
 		}
+
+		this.sendUpdateNotifications(packet);
+
 		this.host = packet.host;
 		this.guests = packet.guests;
 
 		this.postStatusUpdate();
+	}
+
+	private sendUpdateNotifications(
+		packet: ValidatedBy<typeof sessionUpdatePacketSchema>
+	): void {
+		const joined = new Set(packet.guests);
+		const left = new Set(this.guests);
+		for (const knownGuest of this.guests) joined.delete(knownGuest);
+		for (const newGuest of packet.guests) left.delete(newGuest);
+
+		for (const joinedGuest of joined) {
+			notify("User Joined", `${joinedGuest} joined the session`);
+		}
+		for (const leftGuest of left) {
+			notify("User Left", `${leftGuest} left the session`);
+		}
 	}
 
 	private postStatusUpdate(): void {
