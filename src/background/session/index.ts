@@ -39,7 +39,12 @@ class Session extends EventEmitter<{ closed: SessionCloseReason }> {
 		if (!this.open) return;
 		this.open = false;
 		this.status = null;
-		notify("Palantir Session Closed", describeSessionCloseReason(reason));
+		if (reason != SessionCloseReason.CLOSED_BY_USER) {
+			notify(
+				"Palantir Session Closed",
+				describeSessionCloseReason(reason)
+			);
+		}
 		this.emit("closed", reason);
 		this.broadcastStatus();
 	}
