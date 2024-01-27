@@ -1,0 +1,48 @@
+{
+    "manifest_version": 2,
+    "name": "Palantir",
+    "version": "0.0.1",
+    "description": "A browser extension to watch videos together on any website",
+    "icons": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png"
+    },
+    "permissions": [
+        "tabs",
+        "storage",
+        "notifications"
+    ],
+    "browser_action": {
+        "default_icon": "icons/icon-32.png",
+        "default_title": "Palantir",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "all_frames": true,
+            "js": [
+                "browser-polyfill.js",
+                "content.js"
+            ]
+        },
+        {
+            "matches": [
+							"https://palantir.niko-roether.dev/join/*",
+							"http://localhost/join/*"
+						],
+            "js": ["join.js"],
+						"run_at": "document_start"
+        }
+    ],
+    "background": {
+        "scripts": [
+            "browser-polyfill.js",
+            "background.js"
+        ]
+    },
+    "options_ui": {
+        "page": "options.html"
+    }
+}
