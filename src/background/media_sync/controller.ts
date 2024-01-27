@@ -35,7 +35,7 @@ class MediaController extends EventEmitter<{
 			this.onMessage(message)
 		);
 		this.closeListener = this.port.on("close", () =>
-			this.emit("close", SessionCloseReason.DISCONNECTED)
+			this.emit("close", SessionCloseReason.UNKNOWN)
 		);
 	}
 
