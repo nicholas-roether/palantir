@@ -76,6 +76,7 @@ class MediaSyncClient extends EventEmitter<{ close: SessionCloseReason }> {
 			log.error(
 				`Recieved malformed media sync init packet: ${mediaSyncInitPacketSchema.reason}`
 			);
+			this.emit("close", SessionCloseReason.UNEXPECTED_PACKET);
 			return;
 		}
 
@@ -131,16 +132,19 @@ class MediaSyncClient extends EventEmitter<{ close: SessionCloseReason }> {
 		);
 		if (!response) {
 			log.error("Frame response timed out");
+			this.emit("close", SessionCloseReason.UNKNOWN);
 			return false;
 		}
 
 		const { message } = response;
 		if (message.type != MessageType.MEDIA_ELEMENT_CONNECTION_RESULT) {
 			log.error("Received invalid response from frame");
+			this.emit("close", SessionCloseReason.UNKNOWN);
 			return false;
 		}
 		if (!message.connected) {
 			log.error("Connection with media element failed");
+			this.emit("close", SessionCloseReason.UNKNOWN);
 			return false;
 		}
 

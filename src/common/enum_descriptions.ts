@@ -15,13 +15,15 @@ function describeSessionCloseReason(reason: SessionCloseReason): string {
 		case SessionCloseReason.UNAUTHORIZED:
 			return "Authorization failed";
 		case SessionCloseReason.UNKNOWN:
-			return "Unknown reason";
+			return "Unknown reason; consult logs";
 		case SessionCloseReason.NO_MEDIA:
 			return "No suitable media found in page";
 		case SessionCloseReason.CLIENT_TOO_OLD:
 			return "Client version too old";
 		case SessionCloseReason.HOST_TOO_OLD:
 			return "Host version too old";
+		case SessionCloseReason.UNEXPECTED_PACKET:
+			return "Received an unexpected packet; this may be due to a version mismatch.";
 	}
 }
 

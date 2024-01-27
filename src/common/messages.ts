@@ -100,7 +100,8 @@ const enum SessionCloseReason {
 	TIMEOUT,
 	NO_MEDIA,
 	CLIENT_TOO_OLD,
-	HOST_TOO_OLD
+	HOST_TOO_OLD,
+	UNEXPECTED_PACKET
 }
 
 class SessionClosedMessage {

@@ -124,6 +124,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 
 		if (!tab) {
 			log.error("Tab couldn't be found!");
+			this.emit("close", SessionCloseReason.UNKNOWN);
 			return null;
 		}
 
