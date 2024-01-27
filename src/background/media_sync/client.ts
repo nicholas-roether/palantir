@@ -103,6 +103,7 @@ class MediaSyncClient extends EventEmitter<{ close: SessionCloseReason }> {
 
 		const controller = new MediaController(port);
 		controller.on("packet", (packet) => this.connection.send(packet));
+		controller.on("close", (reason) => this.emit("close", reason));
 		this.controller?.stop();
 		this.controller = controller;
 	}

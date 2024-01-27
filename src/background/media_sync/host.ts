@@ -109,6 +109,7 @@ class MediaSyncHost extends EventEmitter<{ close: SessionCloseReason }> {
 		this.controller.on("packet", (packet) =>
 			this.subscription.send(packet)
 		);
+		this.controller.on("close", (reason) => this.emit("close", reason));
 		return true;
 	}
 

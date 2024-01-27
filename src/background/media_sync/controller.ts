@@ -4,7 +4,8 @@ import {
 	MediaSyncMessage,
 	Message,
 	MessageType,
-	RequestMediaHeartbeatMessage
+	RequestMediaHeartbeatMessage,
+	SessionCloseReason
 } from "../../common/messages";
 import { EventEmitter } from "../../common/event_emitter";
 import mediaSyncLogger from "./logger";
@@ -21,10 +22,11 @@ const syncMediaPacketSchema = ty.object({
 
 class MediaController extends EventEmitter<{
 	packet: Packet;
-	disconnect: void;
+	close: SessionCloseReason;
 }> {
 	private readonly port: MessagePort;
 	private readonly messageListener: number;
+	private readonly closeListener: number;
 
 	constructor(port: MessagePort) {
 		super();
@@ -32,7 +34,9 @@ class MediaController extends EventEmitter<{
 		this.messageListener = this.port.on("message", ({ message }) =>
 			this.onMessage(message)
 		);
-		this.port.on("close", () => this.emit("disconnect", undefined));
+		this.closeListener = this.port.on("close", () =>
+			this.emit("close", SessionCloseReason.DISCONNECTED)
+		);
 	}
 
 	public handle(packet: Packet): void {
@@ -41,6 +45,7 @@ class MediaController extends EventEmitter<{
 			log.error(
 				`Received invalid SYNC_MEDIA packet: ${syncMediaPacketSchema.reason}`
 			);
+			this.emit("close", SessionCloseReason.UNEXPECTED_PACKET);
 			return;
 		}
 
@@ -52,6 +57,7 @@ class MediaController extends EventEmitter<{
 
 	public stop(): void {
 		this.port.removeListener(this.messageListener);
+		this.port.removeListener(this.closeListener);
 		this.port.close();
 	}
 
